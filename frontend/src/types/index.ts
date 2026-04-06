@@ -3,13 +3,27 @@ export interface Agent {
   name: string;
   description: string;
   status: string;
-  model: string;
-  temperature: number;
+  modelId: string;
+  model?: Model;
+  temperature?: number;
   config?: Record<string, any>;
   tools: Tool[];
   prompt?: Prompt;
+  promptTemplate?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface Model {
+  id: string;
+  name: string;
+  version: string;
+  apiKey?: string | null;
+  status: 'enabled' | 'disabled';
+  temperature: number;
+  createdAt: string;
+  updatedAt: string;
+  ownerId?: string;
 }
 
 export interface Tool {

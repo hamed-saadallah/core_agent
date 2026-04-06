@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsOptional, IsJSON, IsNumber, Min, Max } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsJSON, IsNumber, IsUUID, Min, Max } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateAgentDto {
@@ -12,16 +12,16 @@ export class CreateAgentDto {
   @IsNotEmpty()
   description: string;
 
+  @ApiProperty({ description: 'Model ID' })
+  @IsUUID()
+  @IsNotEmpty()
+  modelId: string;
+
   @ApiPropertyOptional({ description: 'Agent configuration' })
   @IsOptional()
   config?: Record<string, any>;
 
-  @ApiPropertyOptional({ description: 'LLM model name' })
-  @IsOptional()
-  @IsString()
-  model?: string;
-
-  @ApiPropertyOptional({ description: 'Temperature for LLM' })
+  @ApiPropertyOptional({ description: 'Temperature for LLM (deprecated, use model temperature)' })
   @IsOptional()
   @IsNumber()
   @Min(0)
@@ -36,6 +36,11 @@ export class CreateAgentDto {
   @IsOptional()
   @IsString()
   promptId?: string;
+
+  @ApiPropertyOptional({ description: 'Prompt template with parameter placeholders like {param}' })
+  @IsOptional()
+  @IsString()
+  promptTemplate?: string;
 }
 
 export class UpdateAgentDto {
@@ -54,16 +59,16 @@ export class UpdateAgentDto {
   @IsString()
   status?: string;
 
+  @ApiPropertyOptional({ description: 'Model ID' })
+  @IsOptional()
+  @IsUUID()
+  modelId?: string;
+
   @ApiPropertyOptional({ description: 'Agent configuration' })
   @IsOptional()
   config?: Record<string, any>;
 
-  @ApiPropertyOptional({ description: 'LLM model name' })
-  @IsOptional()
-  @IsString()
-  model?: string;
-
-  @ApiPropertyOptional({ description: 'Temperature for LLM' })
+  @ApiPropertyOptional({ description: 'Temperature for LLM (deprecated, use model temperature)' })
   @IsOptional()
   @IsNumber()
   @Min(0)
@@ -78,12 +83,27 @@ export class UpdateAgentDto {
   @IsOptional()
   @IsString()
   promptId?: string;
+
+  @ApiPropertyOptional({ description: 'Prompt template with parameter placeholders like {param}' })
+  @IsOptional()
+  @IsString()
+  promptTemplate?: string;
 }
 
 export class ExecuteAgentDto {
   @ApiProperty({ description: 'Agent input/query' })
   @IsNotEmpty()
   input: any;
+
+  @ApiPropertyOptional({ description: 'Additional metadata' })
+  @IsOptional()
+  metadata?: Record<string, any>;
+}
+
+export class ExecuteAgentWithParametersDto {
+  @ApiProperty({ description: 'Parameters to fill template placeholders' })
+  @IsNotEmpty()
+  parameters: Record<string, string>;
 
   @ApiPropertyOptional({ description: 'Additional metadata' })
   @IsOptional()

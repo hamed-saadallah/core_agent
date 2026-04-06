@@ -1,7 +1,7 @@
 import axios, { AxiosInstance } from 'axios';
 import { Agent, Tool, AgentRun, ApiResponse } from '@/types';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 class ApiClient {
   private client: AxiosInstance;
@@ -27,6 +27,7 @@ class ApiClient {
       (error) => {
         if (error.response?.status === 401) {
           localStorage.removeItem('auth_token');
+          localStorage.removeItem('user');
           window.location.href = '/login';
         }
         return Promise.reject(error);
@@ -39,4 +40,7 @@ class ApiClient {
   }
 }
 
-export const apiClient = new ApiClient().getClient();
+const apiClientInstance = new ApiClient().getClient();
+
+export const apiClient = apiClientInstance;
+export default apiClientInstance;

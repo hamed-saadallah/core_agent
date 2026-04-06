@@ -13,4 +13,10 @@ export const agentsApi = {
   update: (id: string, agent: Partial<Agent>) => apiClient.put<ApiResponse<Agent>>(`/agents/${id}`, agent),
 
   delete: (id: string) => apiClient.delete<ApiResponse<{ success: boolean }>>(`/agents/${id}`),
+
+  execute: (id: string, parameters: Record<string, string>, metadata?: Record<string, any>) =>
+    apiClient.post<ApiResponse<{ success: boolean; output: any; executionTime: number; runId: string }>>(
+      `/agents/${id}/execute`,
+      { parameters, metadata },
+    ),
 };

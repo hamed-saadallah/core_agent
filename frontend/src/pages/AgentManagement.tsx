@@ -1,11 +1,20 @@
 import React, { useEffect, useState } from 'react';
+import { FiPlay } from 'react-icons/fi';
 import { useAppStore } from '@/store';
 import { agentsApi } from '@/api/agents';
 import { Agent } from '@/types';
+import { CreateAgentModal } from '@/components/modals/CreateAgentModal';
+import { ExecuteAgentModal } from '@/components/modals/ExecuteAgentModal';
+import { EditAgentModal } from '@/components/modals/EditAgentModal';
 
 export const AgentManagement: React.FC = () => {
-  const { agents, setAgents, loading, setLoading, error, setError } = useAppStore();
+  const { agents, setAgents, loading, setLoading, error, setError, removeAgent } = useAppStore();
   const [localAgents, setLocalAgents] = useState<Agent[]>([]);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isExecuteModalOpen, setIsExecuteModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
+  const [editingAgent, setEditingAgent] = useState<Agent | null>(null);
 
   useEffect(() => {
     const fetchAgents = async () => {
@@ -24,11 +33,43 @@ export const AgentManagement: React.FC = () => {
     fetchAgents();
   }, []);
 
+  const handleRunAgent = (agent: Agent) => {
+    if (!agent.promptTemplate) {
+      setError('This agent does not have a prompt template configured');
+      return;
+    }
+    setSelectedAgent(agent);
+    setIsExecuteModalOpen(true);
+  };
+
+  const handleEditAgent = (agent: Agent) => {
+    setEditingAgent(agent);
+    setIsEditModalOpen(true);
+  };
+
+  const handleDeleteAgent = async (agentId: string) => {
+    if (!window.confirm('Are you sure you want to delete this agent?')) {
+      return;
+    }
+
+    try {
+      await agentsApi.delete(agentId);
+      setLocalAgents(localAgents.filter((a) => a.id !== agentId));
+      removeAgent(agentId);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete agent');
+    }
+  };
+
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Agents</h1>
-        <button className="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition">
+        <button
+          onClick={() => setIsCreateModalOpen(true)}
+          className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
+        >
           Create Agent
         </button>
       </div>
@@ -41,13 +82,47 @@ export const AgentManagement: React.FC = () => {
           <div key={agent.id} className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
             <h3 className="text-lg font-semibold mb-2">{agent.name}</h3>
             <p className="text-gray-600 text-sm mb-4">{agent.description}</p>
+            {agent.model && (
+              <div className="mb-4 p-3 bg-purple-50 rounded border border-purple-200">
+                <p className="text-xs font-medium text-purple-900 mb-1">Model:</p>
+                <p className="text-sm text-purple-800 font-semibold">{agent.model.name} (v{agent.model.version})</p>
+                <p className="text-xs text-purple-700">Temperature: {agent.model.temperature.toFixed(2)}</p>
+              </div>
+            )}
+            {agent.promptTemplate && (
+              <div className="mb-4 p-3 bg-blue-50 rounded border border-blue-200">
+                <p className="text-xs font-medium text-blue-900 mb-1">Prompt Template:</p>
+                <p className="text-xs text-blue-800 font-mono truncate">
+                  {agent.promptTemplate}
+                </p>
+              </div>
+            )}
             <div className="flex items-center justify-between">
               <span className={`px-3 py-1 rounded-full text-sm ${agent.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
                 {agent.status}
               </span>
               <div className="space-x-2">
-                <button className="text-primary-600 hover:text-primary-700 text-sm">Edit</button>
-                <button className="text-red-600 hover:text-red-700 text-sm">Delete</button>
+                {agent.promptTemplate && (
+                  <button
+                    onClick={() => handleRunAgent(agent)}
+                    className="inline-flex items-center gap-1 text-green-600 hover:text-green-700 text-sm hover:bg-green-50 px-2 py-1 rounded transition"
+                  >
+                    <FiPlay size={14} />
+                    Run
+                  </button>
+                )}
+                <button
+                  onClick={() => handleEditAgent(agent)}
+                  className="text-blue-600 hover:text-blue-700 text-sm hover:bg-blue-50 px-2 py-1 rounded transition"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => handleDeleteAgent(agent.id)}
+                  className="text-red-600 hover:text-red-700 text-sm hover:bg-red-50 px-2 py-1 rounded transition"
+                >
+                  Delete
+                </button>
               </div>
             </div>
           </div>
@@ -59,6 +134,37 @@ export const AgentManagement: React.FC = () => {
           <p className="text-gray-500">No agents found. Create one to get started.</p>
         </div>
       )}
+
+      <CreateAgentModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSuccess={(newAgent) => {
+          setLocalAgents([...localAgents, newAgent]);
+        }}
+      />
+
+      <EditAgentModal
+        isOpen={isEditModalOpen}
+        agent={editingAgent}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setEditingAgent(null);
+        }}
+        onSuccess={(updatedAgent) => {
+          setLocalAgents(
+            localAgents.map((a) => (a.id === updatedAgent.id ? updatedAgent : a))
+          );
+        }}
+      />
+
+      <ExecuteAgentModal
+        isOpen={isExecuteModalOpen}
+        agent={selectedAgent}
+        onClose={() => {
+          setIsExecuteModalOpen(false);
+          setSelectedAgent(null);
+        }}
+      />
     </div>
   );
 };

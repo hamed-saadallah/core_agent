@@ -4,6 +4,7 @@ import { UserEntity } from './user.entity';
 import { ToolEntity } from './tool.entity';
 import { PromptEntity } from './prompt.entity';
 import { AgentRunEntity } from './agent-run.entity';
+import { ModelEntity } from './model.entity';
 
 @Entity({ name: 'agents' })
 export class AgentEntity extends BaseEntity {
@@ -19,10 +20,10 @@ export class AgentEntity extends BaseEntity {
   @Column({ type: 'jsonb', nullable: true })
   config: Record<string, any>;
 
-  @ManyToOne(() => UserEntity, (user) => user.agents)
+  @ManyToOne(() => UserEntity, (user) => user.agents, { nullable: true })
   owner: UserEntity;
 
-  @Column({ type: 'uuid' })
+  @Column({ type: 'uuid', nullable: true })
   ownerId: string;
 
   @ManyToMany(() => ToolEntity, { eager: true })
@@ -38,9 +39,15 @@ export class AgentEntity extends BaseEntity {
   @OneToMany(() => AgentRunEntity, (run) => run.agent)
   runs: AgentRunEntity[];
 
-  @Column({ type: 'varchar', length: 50, default: 'gpt-3.5-turbo' })
-  model: string;
+  @ManyToOne(() => ModelEntity, (model) => model.agents, { nullable: true })
+  model: ModelEntity;
+
+  @Column({ type: 'uuid', nullable: true })
+  modelId: string;
 
   @Column({ type: 'decimal', default: 0.7 })
   temperature: number;
+
+  @Column({ type: 'text', nullable: true })
+  promptTemplate: string;
 }
