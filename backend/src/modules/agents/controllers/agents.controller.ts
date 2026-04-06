@@ -32,8 +32,8 @@ export class AgentsController {
   @Get(':id')
   @ApiOperation({ summary: 'Get agent by ID' })
   @ApiResponse({ status: 200, description: 'Agent details' })
-  async findOne(@Param('id') id: string) {
-    return await this.agentsService.findOne(id);
+  async findOne(@Param('id') id: string, @CurrentUser() user: UserEntity) {
+    return await this.agentsService.findOne(id, user.id);
   }
 
   @Put(':id')
@@ -46,8 +46,8 @@ export class AgentsController {
   @Delete(':id')
   @ApiOperation({ summary: 'Delete agent' })
   @ApiResponse({ status: 200, description: 'Agent deleted successfully' })
-  async remove(@Param('id') id: string) {
-    return await this.agentsService.remove(id);
+  async remove(@Param('id') id: string, @CurrentUser() user: UserEntity) {
+    return await this.agentsService.remove(id, user.id);
   }
 
   @Post(':id/execute')

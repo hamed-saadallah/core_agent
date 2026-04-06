@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ModelEntity } from '@/infrastructure/database/entities/model.entity';
@@ -49,7 +49,7 @@ export class ModelsService {
     return model;
   }
 
-  async findOneById(id: string): Promise<ModelEntity> {
+  async findOneById(id: string, ownerId?: string): Promise<ModelEntity> {
     const model = await this.modelsRepository.findOne({
       where: { id },
     });
@@ -58,11 +58,16 @@ export class ModelsService {
       throw new NotFoundException(`Model with id ${id} not found`);
     }
 
+    // Check ownership if ownerId is provided
+    if (ownerId && model.ownerId !== ownerId) {
+      throw new ForbiddenException('You do not have permission to access this model');
+    }
+
     return model;
   }
 
   async update(id: string, updateModelDto: UpdateModelDto, ownerId: string): Promise<ModelEntity> {
-    const model = await this.findOneById(id);
+    const model = await this.findOneById(id, ownerId);
 
     if (updateModelDto.apiKey) {
       updateModelDto.apiKey = EncryptionUtil.encrypt(updateModelDto.apiKey, this.encryptionSecret);
@@ -73,7 +78,7 @@ export class ModelsService {
   }
 
   async remove(id: string, ownerId: string): Promise<void> {
-    const model = await this.findOneById(id);
+    const model = await this.findOneById(id, ownerId);
 
     const agentCount = await this.modelsRepository.query(
       'SELECT COUNT(*) FROM agents WHERE "modelId" = $1',

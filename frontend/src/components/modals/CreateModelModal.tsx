@@ -20,7 +20,7 @@ export const CreateModelModal: React.FC<CreateModelModalProps> = ({ isOpen, onCl
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { addModel } = useAppStore();
+  const addModel = useAppStore((s) => s.addModel);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;

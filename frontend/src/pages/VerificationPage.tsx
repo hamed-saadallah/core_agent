@@ -13,7 +13,8 @@ export const VerificationPage: React.FC = () => {
   const [resendCooldown, setResendCooldown] = useState(0);
   const navigate = useNavigate();
   const location = useLocation();
-  const { currentUser, token } = useStore();
+  const currentUser = useStore((s) => s.currentUser);
+  const token = useStore((s) => s.token);
 
   useEffect(() => {
     const state = location.state as { email?: string } | null;

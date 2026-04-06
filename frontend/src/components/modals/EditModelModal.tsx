@@ -27,7 +27,7 @@ export const EditModelModal: React.FC<EditModelModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showApiKey, setShowApiKey] = useState(false);
-  const { updateModel } = useAppStore();
+  const updateModel = useAppStore((s) => s.updateModel);
 
   useEffect(() => {
     if (model && isOpen) {

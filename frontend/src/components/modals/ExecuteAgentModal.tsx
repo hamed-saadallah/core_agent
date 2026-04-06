@@ -62,8 +62,8 @@ export const ExecuteAgentModal: React.FC<ExecuteAgentModalProps> = ({
         throw new Error(`Please fill in all parameters: ${emptyParams.join(', ')}`);
       }
 
-      const response = await agentsApi.execute(agent.id, parameters);
-      const { output, executionTime: time } = response.data.data;
+      const data = await agentsApi.execute(agent.id, parameters);
+      const { output, executionTime: time } = data;
 
       setResult(output);
       setExecutionTime(time);

@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import { AgentEntity } from '@/infrastructure/database/entities/agent.entity';
@@ -69,7 +69,7 @@ export class AgentsService {
     return { agents, total };
   }
 
-  async findOne(id: string): Promise<AgentEntity> {
+  async findOne(id: string, userId?: string): Promise<AgentEntity> {
     const agent = await this.agentRepository.findOne({
       where: { id },
       relations: ['model'],
@@ -77,13 +77,19 @@ export class AgentsService {
     if (!agent) {
       throw new NotFoundException(`Agent with ID ${id} not found`);
     }
+    
+    // Check ownership if userId is provided
+    if (userId && agent.ownerId !== userId) {
+      throw new ForbiddenException('You do not have permission to access this agent');
+    }
+    
     return agent;
   }
 
   async update(id: string, updateAgentDto: UpdateAgentDto, userId?: string): Promise<AgentEntity> {
     this.logger.log(`Updating agent: ${id}`);
 
-    const agent = await this.findOne(id);
+    const agent = await this.findOne(id, userId);
 
     // If modelId is being updated, validate it exists
     if (updateAgentDto.modelId) {
@@ -115,8 +121,12 @@ export class AgentsService {
     return await this.agentRepository.save(agent);
   }
 
-  async remove(id: string): Promise<{ success: boolean }> {
+  async remove(id: string, userId?: string): Promise<{ success: boolean }> {
     this.logger.log(`Deleting agent: ${id}`);
+    
+    // Check ownership first
+    const agent = await this.findOne(id, userId);
+    
     const result = await this.agentRepository.delete(id);
     if (result.affected === 0) {
       throw new NotFoundException(`Agent with ID ${id} not found`);
@@ -135,7 +145,7 @@ export class AgentsService {
   ): Promise<{ success: boolean; output: any; executionTime: number; runId: string }> {
     this.logger.log(`Executing agent: ${agentId}`);
 
-    const agent = await this.findOne(agentId);
+    const agent = await this.findOne(agentId, userId);
     
     // Check if agent has a prompt template
     if (!agent.promptTemplate) {

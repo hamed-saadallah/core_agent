@@ -7,7 +7,7 @@ interface PrivateRouteProps {
 }
 
 export const PrivateRoute: React.FC<PrivateRouteProps> = ({ element }) => {
-  const { isAuthenticated } = useStore();
+  const isAuthenticated = useStore((s) => s.isAuthenticated);
 
   return isAuthenticated ? element : <Navigate to="/login" replace />;
 };

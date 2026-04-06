@@ -8,10 +8,14 @@ export interface ProfileData {
 
 export const fetchProfile = async () => {
   const response = await client.get('/profiles/me');
-  return response.data;
+  // Handle the wrapped response format from backend TransformInterceptor
+  const responseData = response.data.data || response.data;
+  return responseData;
 };
 
 export const updateProfile = async (data: ProfileData) => {
   const response = await client.patch('/profiles/me', data);
-  return response.data;
+  // Handle the wrapped response format from backend TransformInterceptor
+  const responseData = response.data.data || response.data;
+  return responseData;
 };

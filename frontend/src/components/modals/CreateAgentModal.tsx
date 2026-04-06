@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { FiX, FiAlertCircle } from 'react-icons/fi';
 import { agentsApi } from '@/api/agents';
 import { modelsApi } from '@/api/models';
-import { useAppStore } from '@/store';
 import { Agent, Model } from '@/types';
+import { useAppStore } from '@/store';
 
 interface CreateAgentModalProps {
   isOpen: boolean;
@@ -21,7 +21,7 @@ export const CreateAgentModal: React.FC<CreateAgentModalProps> = ({ isOpen, onCl
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [models, setModels] = useState<Model[]>([]);
-  const { addAgent } = useAppStore();
+  const addAgent = useAppStore((s) => s.addAgent);
 
   useEffect(() => {
     if (isOpen) {
@@ -72,8 +72,7 @@ export const CreateAgentModal: React.FC<CreateAgentModalProps> = ({ isOpen, onCl
         throw new Error('Model selection is required');
       }
 
-      const response = await agentsApi.create(formData);
-      const newAgent = response.data.data;
+      const newAgent = await agentsApi.create(formData);
 
       addAgent(newAgent);
       onSuccess(newAgent);

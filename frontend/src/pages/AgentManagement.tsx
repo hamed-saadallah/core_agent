@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { FiPlay } from 'react-icons/fi';
+import { useShallow } from 'zustand/react/shallow';
 import { useAppStore } from '@/store';
 import { agentsApi } from '@/api/agents';
 import { Agent } from '@/types';
@@ -8,8 +9,15 @@ import { ExecuteAgentModal } from '@/components/modals/ExecuteAgentModal';
 import { EditAgentModal } from '@/components/modals/EditAgentModal';
 
 export const AgentManagement: React.FC = () => {
-  const { agents, setAgents, loading, setLoading, error, setError, removeAgent } = useAppStore();
+  const { setAgents, removeAgent } = useAppStore(
+    useShallow((s) => ({
+      setAgents: s.setAgents,
+      removeAgent: s.removeAgent,
+    }))
+  );
   const [localAgents, setLocalAgents] = useState<Agent[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isExecuteModalOpen, setIsExecuteModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -19,10 +27,11 @@ export const AgentManagement: React.FC = () => {
   useEffect(() => {
     const fetchAgents = async () => {
       setLoading(true);
+      setError(null);
       try {
-        const response = await agentsApi.getAll();
-        setLocalAgents(response.data.data.agents);
-        setAgents(response.data.data.agents);
+        const { agents } = await agentsApi.getAll();
+        setLocalAgents(agents);
+        setAgents(agents);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to fetch agents');
       } finally {
@@ -31,7 +40,7 @@ export const AgentManagement: React.FC = () => {
     };
 
     fetchAgents();
-  }, []);
+  }, [setAgents]);
 
   const handleRunAgent = (agent: Agent) => {
     if (!agent.promptTemplate) {
@@ -54,7 +63,7 @@ export const AgentManagement: React.FC = () => {
 
     try {
       await agentsApi.delete(agentId);
-      setLocalAgents(localAgents.filter((a) => a.id !== agentId));
+      setLocalAgents((prev) => prev.filter((a) => a.id !== agentId));
       removeAgent(agentId);
       setError(null);
     } catch (err) {
@@ -139,7 +148,7 @@ export const AgentManagement: React.FC = () => {
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onSuccess={(newAgent) => {
-          setLocalAgents([...localAgents, newAgent]);
+          setLocalAgents((prev) => [...prev, newAgent]);
         }}
       />
 
@@ -151,9 +160,7 @@ export const AgentManagement: React.FC = () => {
           setEditingAgent(null);
         }}
         onSuccess={(updatedAgent) => {
-          setLocalAgents(
-            localAgents.map((a) => (a.id === updatedAgent.id ? updatedAgent : a))
-          );
+          setLocalAgents((prev) => prev.map((a) => (a.id === updatedAgent.id ? updatedAgent : a)));
         }}
       />
 

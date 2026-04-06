@@ -9,7 +9,8 @@ export const LoginPage: React.FC = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { setCurrentUser, setToken } = useStore();
+  const setCurrentUser = useStore((s) => s.setCurrentUser);
+  const setToken = useStore((s) => s.setToken);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,11 +19,24 @@ export const LoginPage: React.FC = () => {
 
     try {
       const result = await login({ email, password });
+      console.log('Login successful:', result);
+      
+      // Set token first (this updates isAuthenticated)
       setToken(result.access_token);
+      // Then set user
       setCurrentUser(result.user);
-      navigate('/');
+      
+      // Wait a moment for state to update, then navigate
+      setTimeout(() => {
+        navigate('/', { replace: true });
+      }, 100);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Login failed. Please try again.');
+      console.error('Login error:', err);
+      const errorMessage = 
+        err.response?.data?.message || 
+        err.message ||
+        'Login failed. Please try again.';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

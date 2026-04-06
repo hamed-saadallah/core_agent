@@ -3,6 +3,7 @@ import { FiEdit2, FiTrash2, FiPlus, FiAlertCircle } from 'react-icons/fi';
 import { CreateModelModal } from '@/components/modals/CreateModelModal';
 import { EditModelModal } from '@/components/modals/EditModelModal';
 import { modelsApi } from '@/api/models';
+import { useShallow } from 'zustand/react/shallow';
 import { useAppStore } from '@/store';
 import { Model } from '@/types';
 
@@ -14,7 +15,13 @@ export const ModelManagementTab: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
-  const { models, setModels, removeModel } = useAppStore();
+  const { models, setModels, removeModel } = useAppStore(
+    useShallow((s) => ({
+      models: s.models,
+      setModels: s.setModels,
+      removeModel: s.removeModel,
+    }))
+  );
 
   useEffect(() => {
     loadModels();

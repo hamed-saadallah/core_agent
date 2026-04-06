@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { FiTrash2, FiEdit2, FiToggleLeft, FiToggleRight } from 'react-icons/fi';
+import { useShallow } from 'zustand/react/shallow';
 import { useAppStore } from '@/store';
 import { modelsApi } from '@/api/models';
 import { Model } from '@/types';
@@ -7,8 +8,10 @@ import { CreateModelModal } from '@/components/modals/CreateModelModal';
 import { EditModelModal } from '@/components/modals/EditModelModal';
 
 export const ModelManagement: React.FC = () => {
-  const { models, setModels, loading, setLoading, error, setError } = useAppStore();
+  const { setModels } = useAppStore(useShallow((s) => ({ setModels: s.setModels })));
   const [localModels, setLocalModels] = useState<Model[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingModel, setEditingModel] = useState<Model | null>(null);
@@ -16,6 +19,7 @@ export const ModelManagement: React.FC = () => {
   useEffect(() => {
     const fetchModels = async () => {
       setLoading(true);
+      setError(null);
       try {
         const response = await modelsApi.getAll();
         setLocalModels(response);
@@ -28,7 +32,7 @@ export const ModelManagement: React.FC = () => {
     };
 
     fetchModels();
-  }, []);
+  }, [setModels]);
 
   const handleEditModel = (model: Model) => {
     setEditingModel(model);

@@ -27,7 +27,7 @@ export const EditAgentModal: React.FC<EditAgentModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [models, setModels] = useState<Model[]>([]);
-  const { updateAgent } = useAppStore();
+  const updateAgent = useAppStore((s) => s.updateAgent);
 
   useEffect(() => {
     if (isOpen) {
@@ -92,8 +92,7 @@ export const EditAgentModal: React.FC<EditAgentModalProps> = ({
         throw new Error('Model selection is required');
       }
 
-      const response = await agentsApi.update(agent.id, formData);
-      const updatedAgent = response.data.data;
+      const updatedAgent = await agentsApi.update(agent.id, formData);
 
       updateAgent(updatedAgent);
       onSuccess(updatedAgent);

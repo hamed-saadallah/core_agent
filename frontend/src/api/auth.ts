@@ -27,25 +27,35 @@ export interface AuthResponse {
 
 export const register = async (data: RegisterRequest) => {
   const response = await client.post('/auth/register', data);
-  return response.data;
+  // Handle the wrapped response format from backend TransformInterceptor
+  const responseData = response.data.data || response.data;
+  return responseData;
 };
 
 export const login = async (data: LoginRequest): Promise<AuthResponse> => {
   const response = await client.post('/auth/login', data);
-  return response.data;
+  // Handle the wrapped response format from backend TransformInterceptor
+  const responseData = response.data.data || response.data;
+  return responseData;
 };
 
 export const verifyEmail = async (data: VerifyEmailRequest) => {
   const response = await client.post('/auth/verify-email', data);
-  return response.data;
+  // Handle the wrapped response format from backend TransformInterceptor
+  const responseData = response.data.data || response.data;
+  return responseData;
 };
 
 export const resendCode = async (data: ResendCodeRequest) => {
   const response = await client.post('/auth/resend-code', data);
-  return response.data;
+  // Handle the wrapped response format from backend TransformInterceptor
+  const responseData = response.data.data || response.data;
+  return responseData;
 };
 
 export const getCurrentUser = async () => {
   const response = await client.get('/auth/me');
-  return response.data;
+  // Handle the wrapped response format from backend TransformInterceptor
+  const responseData = response.data.data || response.data;
+  return responseData;
 };
