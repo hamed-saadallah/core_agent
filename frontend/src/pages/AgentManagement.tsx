@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { FiPlay } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
 import { useShallow } from 'zustand/react/shallow';
 import { useAppStore } from '@/store';
 import { agentsApi } from '@/api/agents';
 import { Agent } from '@/types';
 import { CreateAgentModal } from '@/components/modals/CreateAgentModal';
-import { ExecuteAgentModal } from '@/components/modals/ExecuteAgentModal';
 import { EditAgentModal } from '@/components/modals/EditAgentModal';
 
 export const AgentManagement: React.FC = () => {
+  const navigate = useNavigate();
   const { setAgents, removeAgent } = useAppStore(
     useShallow((s) => ({
       setAgents: s.setAgents,
@@ -19,9 +19,7 @@ export const AgentManagement: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [isExecuteModalOpen, setIsExecuteModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
   const [editingAgent, setEditingAgent] = useState<Agent | null>(null);
 
   useEffect(() => {
@@ -42,13 +40,8 @@ export const AgentManagement: React.FC = () => {
     fetchAgents();
   }, [setAgents]);
 
-  const handleRunAgent = (agent: Agent) => {
-    if (!agent.promptTemplate) {
-      setError('This agent does not have a prompt template configured');
-      return;
-    }
-    setSelectedAgent(agent);
-    setIsExecuteModalOpen(true);
+  const handleViewAgentDetails = (agent: Agent) => {
+    navigate(`/agents/${agent.id}`);
   };
 
   const handleEditAgent = (agent: Agent) => {
@@ -88,14 +81,18 @@ export const AgentManagement: React.FC = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {localAgents.map((agent) => (
-          <div key={agent.id} className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
+          <button
+            key={agent.id}
+            onClick={() => handleViewAgentDetails(agent)}
+            className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition text-left"
+          >
             <h3 className="text-lg font-semibold mb-2">{agent.name}</h3>
             <p className="text-gray-600 text-sm mb-4">{agent.description}</p>
             {agent.model && (
               <div className="mb-4 p-3 bg-purple-50 rounded border border-purple-200">
                 <p className="text-xs font-medium text-purple-900 mb-1">Model:</p>
                 <p className="text-sm text-purple-800 font-semibold">{agent.model.name} (v{agent.model.version})</p>
-                <p className="text-xs text-purple-700">Temperature: {agent.model.temperature.toFixed(2)}</p>
+                <p className="text-xs text-purple-700">Temperature: {agent.temperature?.toFixed(2) ?? agent.model?.temperature?.toFixed(2)}</p>
               </div>
             )}
             {agent.promptTemplate && (
@@ -110,31 +107,8 @@ export const AgentManagement: React.FC = () => {
               <span className={`px-3 py-1 rounded-full text-sm ${agent.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
                 {agent.status}
               </span>
-              <div className="space-x-2">
-                {agent.promptTemplate && (
-                  <button
-                    onClick={() => handleRunAgent(agent)}
-                    className="inline-flex items-center gap-1 text-green-600 hover:text-green-700 text-sm hover:bg-green-50 px-2 py-1 rounded transition"
-                  >
-                    <FiPlay size={14} />
-                    Run
-                  </button>
-                )}
-                <button
-                  onClick={() => handleEditAgent(agent)}
-                  className="text-blue-600 hover:text-blue-700 text-sm hover:bg-blue-50 px-2 py-1 rounded transition"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleDeleteAgent(agent.id)}
-                  className="text-red-600 hover:text-red-700 text-sm hover:bg-red-50 px-2 py-1 rounded transition"
-                >
-                  Delete
-                </button>
-              </div>
             </div>
-          </div>
+          </button>
         ))}
       </div>
 
@@ -161,15 +135,6 @@ export const AgentManagement: React.FC = () => {
         }}
         onSuccess={(updatedAgent) => {
           setLocalAgents((prev) => prev.map((a) => (a.id === updatedAgent.id ? updatedAgent : a)));
-        }}
-      />
-
-      <ExecuteAgentModal
-        isOpen={isExecuteModalOpen}
-        agent={selectedAgent}
-        onClose={() => {
-          setIsExecuteModalOpen(false);
-          setSelectedAgent(null);
         }}
       />
     </div>

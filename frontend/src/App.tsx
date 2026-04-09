@@ -8,6 +8,8 @@ import { getCurrentUser } from './api/auth';
 
 const Dashboard = lazy(() => import('./pages/Dashboard').then((m) => ({ default: m.Dashboard })));
 const AgentManagement = lazy(() => import('./pages/AgentManagement').then((m) => ({ default: m.AgentManagement })));
+const AgentDetail = lazy(() => import('./pages/AgentDetail').then((m) => ({ default: m.AgentDetail })));
+const AgentRunDetail = lazy(() => import('./pages/AgentRunDetail').then((m) => ({ default: m.AgentRunDetail })));
 const AgentRunsPage = lazy(() => import('./pages/AgentRunsPage').then((m) => ({ default: m.AgentRunsPage })));
 const Settings = lazy(() => import('./pages/Settings').then((m) => ({ default: m.Settings })));
 const LoginPage = lazy(() => import('./pages/LoginPage').then((m) => ({ default: m.LoginPage })));
@@ -60,6 +62,8 @@ function App() {
           {/* Protected Routes */}
           <Route path="/" element={<PrivateRoute element={<PrivateLayout element={<Dashboard />} />} />} />
           <Route path="/agents" element={<PrivateRoute element={<PrivateLayout element={<AgentManagement />} />} />} />
+          <Route path="/agents/:id" element={<PrivateRoute element={<PrivateLayout element={<AgentDetail />} />} />} />
+          <Route path="/agents/:agentId/runs/:runId" element={<PrivateRoute element={<PrivateLayout element={<AgentRunDetail />} />} />} />
           <Route path="/agent-runs" element={<PrivateRoute element={<PrivateLayout element={<AgentRunsPage />} />} />} />
           <Route path="/settings" element={<PrivateRoute element={<PrivateLayout element={<Settings />} />} />} />
 

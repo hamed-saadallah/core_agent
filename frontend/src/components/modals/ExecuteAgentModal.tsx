@@ -7,12 +7,14 @@ interface ExecuteAgentModalProps {
   isOpen: boolean;
   agent: Agent | null;
   onClose: () => void;
+  onExecutionComplete?: (runId: string) => void;
 }
 
 export const ExecuteAgentModal: React.FC<ExecuteAgentModalProps> = ({
   isOpen,
   agent,
   onClose,
+  onExecutionComplete,
 }) => {
   const [parameters, setParameters] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -63,10 +65,14 @@ export const ExecuteAgentModal: React.FC<ExecuteAgentModalProps> = ({
       }
 
       const data = await agentsApi.execute(agent.id, parameters);
-      const { output, executionTime: time } = data;
+      const { output, executionTime: time, runId } = data;
 
       setResult(output);
       setExecutionTime(time);
+      
+      if (onExecutionComplete && runId) {
+        onExecutionComplete(runId);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to execute agent');
     } finally {

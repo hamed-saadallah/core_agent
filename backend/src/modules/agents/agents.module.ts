@@ -8,11 +8,17 @@ import { ModelEntity } from '@/infrastructure/database/entities/model.entity';
 import { AgentsService } from './services/agents.service';
 import { AgentsController } from './controllers/agents.controller';
 import { ModelsModule } from '@/modules/models/models.module';
+import { AuthModule } from '@/modules/auth/auth.module';
+import { LLMModule } from '@/infrastructure/llm/llm.module';
+import { AgentRunsModule } from '@/modules/agent-runs/agent-runs.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([AgentEntity, ToolEntity, PromptEntity, AgentRunEntity, ModelEntity]),
     ModelsModule,
+    AuthModule,
+    LLMModule,
+    AgentRunsModule,
   ],
   providers: [AgentsService],
   controllers: [AgentsController],

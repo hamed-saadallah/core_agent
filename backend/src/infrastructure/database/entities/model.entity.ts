@@ -18,7 +18,11 @@ export class ModelEntity extends BaseEntity {
   @Column({ type: 'varchar', length: 50, default: 'enabled' })
   status: string;
 
-  @Column({ type: 'decimal', default: 0.7 })
+  @Column({
+    type: 'decimal',
+    default: 0.7,
+    transformer: { to: (v: number) => v, from: (v: string) => parseFloat(v) },
+  })
   temperature: number;
 
   @ManyToOne(() => UserEntity, (user) => user.models, { nullable: true })

@@ -14,6 +14,21 @@ import { VerificationService } from './services/verification.service';
 import { AuthController } from './controllers/auth.controller';
 import { UsersService } from '../users/services/users.service';
 
+function parseJwtExpiration(raw: string | undefined): string | number {
+  if (!raw || raw.trim() === '') {
+    return 3600;
+  }
+
+  const normalized = raw.trim();
+  if (/^\d+$/.test(normalized)) {
+    // Numeric env values are treated as seconds.
+    return Number(normalized);
+  }
+
+  // Duration strings like "30m", "1h", "7d" are supported by jsonwebtoken.
+  return normalized;
+}
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([UserEntity, EmailVerificationEntity, PlanEntity, ProfileEntity]),
@@ -22,7 +37,7 @@ import { UsersService } from '../users/services/users.service';
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
         signOptions: {
-          expiresIn: configService.get<number>('JWT_EXPIRATION', 3600),
+          expiresIn: parseJwtExpiration(configService.get<string>('JWT_EXPIRATION')),
         },
       }),
       inject: [ConfigService],
@@ -30,6 +45,6 @@ import { UsersService } from '../users/services/users.service';
   ],
   providers: [JwtAuthStrategy, AuthService, EmailService, VerificationService, UsersService],
   controllers: [AuthController],
-  exports: [AuthService],
+  exports: [AuthService, PassportModule, JwtModule],
 })
 export class AuthModule {}

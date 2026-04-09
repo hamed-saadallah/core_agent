@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, BadRequestException, UnauthorizedException, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../../users/services/users.service';
 import { EmailService } from './email.service';
@@ -8,6 +8,8 @@ import { UserEntity } from '@/infrastructure/database/entities/user.entity';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
@@ -51,6 +53,16 @@ export class AuthService {
       sub: user.id,
       email: user.email,
     });
+
+    if (process.env.NODE_ENV !== 'production') {
+      const decoded = this.jwtService.decode(access_token) as { iat?: number; exp?: number } | null;
+      const now = Math.floor(Date.now() / 1000);
+      const expiresAt = decoded?.exp ?? null;
+      const ttlSeconds = typeof expiresAt === 'number' ? expiresAt - now : null;
+      this.logger.log(
+        `Issued JWT for ${user.email} (exp=${expiresAt ?? 'n/a'}, ttlSeconds=${ttlSeconds ?? 'n/a'})`,
+      );
+    }
 
     return {
       access_token,

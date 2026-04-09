@@ -10,6 +10,7 @@ import { ModelsModule } from './modules/models/models.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { ProfilesModule } from './modules/profiles/profiles.module';
+import { LLMModule } from './infrastructure/llm/llm.module';
 import { HealthController } from './health.controller';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
@@ -18,13 +19,33 @@ import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { LoggerService } from './common/services/logger.service';
 import { InitializationService } from './common/services/initialization.service';
 
+function validateEnv(config: Record<string, unknown>) {
+  const jwtSecret = String(config.JWT_SECRET ?? '').trim();
+  if (!jwtSecret) {
+    throw new Error('Invalid environment: JWT_SECRET is required');
+  }
+
+  const rawExpiration = String(config.JWT_EXPIRATION ?? '3600').trim();
+  const isIntegerSeconds = /^\d+$/.test(rawExpiration);
+  const isDurationWithUnit = /^\d+(ms|s|m|h|d|w|y)$/i.test(rawExpiration);
+  if (!isIntegerSeconds && !isDurationWithUnit) {
+    throw new Error(
+      'Invalid environment: JWT_EXPIRATION must be integer seconds or a duration string (e.g. 30m, 1h, 7d)',
+    );
+  }
+
+  return config;
+}
+
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
+      validate: validateEnv,
     }),
     DatabaseModule,
+    LLMModule,
     AgentsModule,
     AgentManagementModule,
     ToolsManagementModule,

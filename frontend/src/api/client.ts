@@ -1,7 +1,10 @@
 import axios, { AxiosInstance } from 'axios';
 import { Agent, Tool, AgentRun, ApiResponse } from '@/types';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+/** Default matches backend `PORT` (see backend/src/main.ts, default 3000). Override with VITE_API_URL. */
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+export const AUTH_UNAUTHORIZED_EVENT = 'auth:unauthorized';
+let isHandlingUnauthorized = false;
 
 class ApiClient {
   private client: AxiosInstance;
@@ -25,10 +28,21 @@ class ApiClient {
     this.client.interceptors.response.use(
       (response) => response,
       (error) => {
-        if (error.response?.status === 401) {
+        const status = error.response?.status;
+        const requestUrl = String(error.config?.url ?? '');
+        const isAuthRequest = requestUrl.includes('/auth/login') || requestUrl.includes('/auth/register');
+
+        if (status === 401 && !isAuthRequest) {
+          if (isHandlingUnauthorized) {
+            return Promise.reject(error);
+          }
+          isHandlingUnauthorized = true;
           localStorage.removeItem('auth_token');
           localStorage.removeItem('user');
-          window.location.href = '/login';
+          window.dispatchEvent(new Event(AUTH_UNAUTHORIZED_EVENT));
+          if (window.location.pathname !== '/login') {
+            window.location.replace('/login');
+          }
         }
         return Promise.reject(error);
       },

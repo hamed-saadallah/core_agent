@@ -1,6 +1,6 @@
-import { Injectable, Logger, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, BadRequestException, ForbiddenException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In } from 'typeorm';
+import { Repository, In, QueryFailedError } from 'typeorm';
 import { AgentEntity } from '@/infrastructure/database/entities/agent.entity';
 import { ToolEntity } from '@/infrastructure/database/entities/tool.entity';
 import { PromptEntity } from '@/infrastructure/database/entities/prompt.entity';
@@ -8,6 +8,8 @@ import { AgentRunEntity } from '@/infrastructure/database/entities/agent-run.ent
 import { ModelEntity } from '@/infrastructure/database/entities/model.entity';
 import { CreateAgentDto, UpdateAgentDto, ExecuteAgentWithParametersDto } from '../dtos/agent.dto';
 import { ModelsService } from '@/modules/models/models.service';
+import { LLMService } from '@/infrastructure/llm/llm.service';
+import { AgentRunsService } from '@/modules/agent-runs/services/agent-runs.service';
 
 @Injectable()
 export class AgentsService {
@@ -20,6 +22,8 @@ export class AgentsService {
     @InjectRepository(AgentRunEntity) private agentRunRepository: Repository<AgentRunEntity>,
     @InjectRepository(ModelEntity) private modelRepository: Repository<ModelEntity>,
     private modelsService: ModelsService,
+    private llmService: LLMService,
+    private agentRunsService: AgentRunsService,
   ) {}
 
   async create(createAgentDto: CreateAgentDto, userId: string): Promise<AgentEntity> {
@@ -55,7 +59,14 @@ export class AgentsService {
       }
     }
 
-    return await this.agentRepository.save(agent);
+    try {
+      return await this.agentRepository.save(agent);
+    } catch (error) {
+      if (this.isDuplicateKeyError(error)) {
+        throw new ConflictException('An agent with this name already exists for your account');
+      }
+      throw error;
+    }
   }
 
   async findAll(userId?: string, skip = 0, limit = 10): Promise<{ agents: AgentEntity[]; total: number }> {
@@ -118,7 +129,14 @@ export class AgentsService {
       }
     }
 
-    return await this.agentRepository.save(agent);
+    try {
+      return await this.agentRepository.save(agent);
+    } catch (error) {
+      if (this.isDuplicateKeyError(error)) {
+        throw new ConflictException('An agent with this name already exists for your account');
+      }
+      throw error;
+    }
   }
 
   async remove(id: string, userId?: string): Promise<{ success: boolean }> {
@@ -147,90 +165,30 @@ export class AgentsService {
 
     const agent = await this.findOne(agentId, userId);
     
-    // Check if agent has a prompt template
     if (!agent.promptTemplate) {
       throw new BadRequestException(`Agent ${agentId} does not have a prompt template`);
     }
 
-    // Check if agent has a model assigned
     if (!agent.modelId) {
       throw new BadRequestException(`Agent ${agentId} does not have a model assigned`);
     }
 
-    // Load the model to get API key and temperature
-    const model = await this.modelRepository.findOne({
-      where: { id: agent.modelId },
-    });
-
-    if (!model) {
-      throw new BadRequestException(`Model ${agent.modelId} not found`);
-    }
-
-    const decryptedApiKey = this.modelsService.decryptApiKey(model);
-    const temperature = agent.temperature || model.temperature;
-
-    const startTime = Date.now();
-    
-    // Replace placeholders in template with provided parameters
-    let filledPrompt = agent.promptTemplate;
-    const parameterRegex = /{(\w+)}/g;
-    const matches = filledPrompt.match(parameterRegex);
-    const parameters = executeDto.parameters || {};
-    
-    if (matches) {
-      matches.forEach((match) => {
-        const paramName = match.slice(1, -1); // Remove { and }
-        const paramValue = parameters[paramName];
-        if (paramValue !== undefined) {
-          filledPrompt = filledPrompt.replace(new RegExp(match, 'g'), paramValue);
-        }
-      });
-    }
-
-    // Create an agent run record
-    const run = this.agentRunRepository.create({
+    return await this.agentRunsService.executeAgentRun(
       agentId,
       userId,
-      input: { template: agent.promptTemplate, parameters },
-      status: 'pending',
-      metadata: executeDto.metadata,
-    });
-    const savedRun = await this.agentRunRepository.save(run);
+      executeDto.parameters || {},
+      agent.promptTemplate,
+      agent.modelId,
+      agent.temperature,
+      executeDto.metadata,
+    );
+  }
 
-    try {
-      // Simulate agent execution with model credentials and temperature
-      // In a real implementation, this would call the actual LLM using decryptedApiKey and temperature
-      const executionResult = {
-        output: `Executed prompt with model ${model.name} (v${model.version}) at temperature ${temperature}:\n\n${filledPrompt}\n\nThis is a simulated execution result.`,
-        model: model.name,
-        version: model.version,
-        temperature,
-        status: 'completed',
-      };
-
-      const executionTime = Date.now() - startTime;
-
-      // Update the run with the result
-      savedRun.output = executionResult;
-      savedRun.status = 'completed';
-      savedRun.executionTime = executionTime;
-      await this.agentRunRepository.save(savedRun);
-
-      return {
-        success: true,
-        output: executionResult,
-        executionTime,
-        runId: savedRun.id,
-      };
-    } catch (error) {
-      const executionTime = Date.now() - startTime;
-      savedRun.status = 'failed';
-      savedRun.error = error instanceof Error ? error.message : String(error);
-      savedRun.executionTime = executionTime;
-      await this.agentRunRepository.save(savedRun);
-
-      this.logger.error(`Agent execution failed: ${error}`);
-      throw new BadRequestException(`Agent execution failed: ${error instanceof Error ? error.message : String(error)}`);
+  private isDuplicateKeyError(error: unknown): boolean {
+    if (!(error instanceof QueryFailedError)) {
+      return false;
     }
+    const pgError = error as QueryFailedError & { code?: string };
+    return pgError.code === '23505';
   }
 }

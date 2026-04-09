@@ -12,6 +12,43 @@ interface User {
   isEmailVerified?: boolean;
 }
 
+/** Strip relations / circular refs from API user payloads before localStorage */
+function toStoredUser(input: unknown): User | null {
+  if (!input || typeof input !== 'object') return null;
+  const o = input as Record<string, unknown>;
+  const id = o.id;
+  const email = o.email;
+  if (typeof id !== 'string' || typeof email !== 'string') return null;
+
+  let profile: User['profile'];
+  const rawProfile = o.profile;
+  if (rawProfile && typeof rawProfile === 'object' && rawProfile !== null) {
+    const p = rawProfile as Record<string, unknown>;
+    profile = {
+      firstName: typeof p.firstName === 'string' ? p.firstName : undefined,
+      lastName: typeof p.lastName === 'string' ? p.lastName : undefined,
+      avatarUrl: typeof p.avatarUrl === 'string' ? p.avatarUrl : undefined,
+    };
+  }
+
+  return {
+    id,
+    email,
+    profile,
+    isEmailVerified: typeof o.isEmailVerified === 'boolean' ? o.isEmailVerified : undefined,
+  };
+}
+
+function readStoredUser(): User | null {
+  try {
+    const raw = localStorage.getItem('user');
+    if (!raw) return null;
+    return toStoredUser(JSON.parse(raw));
+  } catch {
+    return null;
+  }
+}
+
 interface AppStore {
   // Auth
   currentUser: User | null;
@@ -54,11 +91,17 @@ interface AppStore {
   updateModel: (model: Model) => void;
 }
 
+const initialToken = localStorage.getItem('auth_token');
+const initialUser = readStoredUser();
+if (!initialToken && initialUser) {
+  localStorage.removeItem('user');
+}
+
 export const useStore = create<AppStore>((set) => ({
   // Auth state
-  currentUser: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user') || '') : null,
-  token: localStorage.getItem('auth_token'),
-  isAuthenticated: !!localStorage.getItem('auth_token'),
+  currentUser: initialUser,
+  token: initialToken,
+  isAuthenticated: !!initialToken,
   isEmailVerified: false,
 
   // Agents state
@@ -74,12 +117,16 @@ export const useStore = create<AppStore>((set) => ({
 
   // Auth setters
   setCurrentUser: (user) => {
-    if (user) {
-      localStorage.setItem('user', JSON.stringify(user));
+    const stored = user ? toStoredUser(user) : null;
+    if (stored) {
+      localStorage.setItem('user', JSON.stringify(stored));
     } else {
       localStorage.removeItem('user');
     }
-    set({ currentUser: user, isAuthenticated: !!user });
+    set((state) => ({
+      currentUser: stored,
+      isAuthenticated: Boolean(state.token),
+    }));
   },
 
   setToken: (token) => {
@@ -88,7 +135,10 @@ export const useStore = create<AppStore>((set) => ({
     } else {
       localStorage.removeItem('auth_token');
     }
-    set({ token, isAuthenticated: !!token });
+    set((state) => ({
+      token,
+      isAuthenticated: Boolean(token),
+    }));
   },
 
   setIsEmailVerified: (verified) => set({ isEmailVerified: verified }),

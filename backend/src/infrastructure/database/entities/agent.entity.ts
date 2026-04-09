@@ -1,4 +1,4 @@
-import { Entity, Column, ManyToOne, OneToMany, ManyToMany, JoinTable } from 'typeorm';
+import { Entity, Column, ManyToOne, OneToMany, ManyToMany, JoinTable, Unique } from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { UserEntity } from './user.entity';
 import { ToolEntity } from './tool.entity';
@@ -7,8 +7,9 @@ import { AgentRunEntity } from './agent-run.entity';
 import { ModelEntity } from './model.entity';
 
 @Entity({ name: 'agents' })
+@Unique(['name', 'ownerId'])
 export class AgentEntity extends BaseEntity {
-  @Column({ type: 'varchar', length: 255, unique: true })
+  @Column({ type: 'varchar', length: 255 })
   name: string;
 
   @Column({ type: 'text' })
@@ -45,7 +46,11 @@ export class AgentEntity extends BaseEntity {
   @Column({ type: 'uuid', nullable: true })
   modelId: string;
 
-  @Column({ type: 'decimal', default: 0.7 })
+  @Column({
+    type: 'decimal',
+    default: 0.7,
+    transformer: { to: (v: number) => v, from: (v: string) => parseFloat(v) },
+  })
   temperature: number;
 
   @Column({ type: 'text', nullable: true })
