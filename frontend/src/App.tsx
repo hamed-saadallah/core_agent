@@ -11,6 +11,10 @@ const AgentManagement = lazy(() => import('./pages/AgentManagement').then((m) =>
 const AgentDetail = lazy(() => import('./pages/AgentDetail').then((m) => ({ default: m.AgentDetail })));
 const AgentRunDetail = lazy(() => import('./pages/AgentRunDetail').then((m) => ({ default: m.AgentRunDetail })));
 const AgentRunsPage = lazy(() => import('./pages/AgentRunsPage').then((m) => ({ default: m.AgentRunsPage })));
+const ChainManagement = lazy(() => import('./pages/ChainManagement').then((m) => ({ default: m.ChainManagement })));
+const ChainDetail = lazy(() => import('./pages/ChainDetail').then((m) => ({ default: m.ChainDetail })));
+const SkillManagement = lazy(() => import('./pages/SkillManagement').then((m) => ({ default: m.SkillManagement })));
+const SkillDetail = lazy(() => import('./pages/SkillDetail').then((m) => ({ default: m.SkillDetail })));
 const Settings = lazy(() => import('./pages/Settings').then((m) => ({ default: m.Settings })));
 const LoginPage = lazy(() => import('./pages/LoginPage').then((m) => ({ default: m.LoginPage })));
 const RegisterPage = lazy(() => import('./pages/RegisterPage').then((m) => ({ default: m.RegisterPage })));
@@ -65,6 +69,10 @@ function App() {
           <Route path="/agents/:id" element={<PrivateRoute element={<PrivateLayout element={<AgentDetail />} />} />} />
           <Route path="/agents/:agentId/runs/:runId" element={<PrivateRoute element={<PrivateLayout element={<AgentRunDetail />} />} />} />
           <Route path="/agent-runs" element={<PrivateRoute element={<PrivateLayout element={<AgentRunsPage />} />} />} />
+          <Route path="/chains" element={<PrivateRoute element={<PrivateLayout element={<ChainManagement />} />} />} />
+          <Route path="/chains/:id" element={<PrivateRoute element={<PrivateLayout element={<ChainDetail />} />} />} />
+          <Route path="/skills" element={<PrivateRoute element={<PrivateLayout element={<SkillManagement />} />} />} />
+          <Route path="/skills/:id" element={<PrivateRoute element={<PrivateLayout element={<SkillDetail />} />} />} />
           <Route path="/settings" element={<PrivateRoute element={<PrivateLayout element={<Settings />} />} />} />
 
           {/* Catch all - redirect to login */}

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { FiMenu, FiX, FiHome, FiTool, FiActivity, FiSettings } from 'react-icons/fi';
+import { FiMenu, FiX, FiHome, FiTool, FiActivity, FiSettings, FiLink2, FiZap } from 'react-icons/fi';
 
 export const Sidebar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -11,6 +11,8 @@ export const Sidebar: React.FC = () => {
   const navItems = [
     { path: '/', label: 'Dashboard', icon: FiHome },
     { path: '/agents', label: 'Agents', icon: FiTool },
+    { path: '/chains', label: 'Chains', icon: FiLink2 },
+    { path: '/skills', label: 'Skills', icon: FiZap },
     { path: '/agent-runs', label: 'Runs', icon: FiActivity },
     { path: '/settings', label: 'Settings', icon: FiSettings },
   ];

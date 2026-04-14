@@ -5,6 +5,7 @@ import { ToolEntity } from './tool.entity';
 import { PromptEntity } from './prompt.entity';
 import { AgentRunEntity } from './agent-run.entity';
 import { ModelEntity } from './model.entity';
+import { SkillEntity } from './skill.entity';
 
 @Entity({ name: 'agents' })
 @Unique(['name', 'ownerId'])
@@ -30,6 +31,9 @@ export class AgentEntity extends BaseEntity {
   @ManyToMany(() => ToolEntity, { eager: true })
   @JoinTable({ name: 'agent_tools' })
   tools: ToolEntity[];
+
+  @ManyToMany(() => SkillEntity, (skill) => skill.agents)
+  skills: SkillEntity[];
 
   @ManyToOne(() => PromptEntity, { eager: true })
   prompt: PromptEntity;

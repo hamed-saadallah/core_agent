@@ -2,14 +2,17 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FiPlay, FiEdit, FiTrash2, FiArrowLeft, FiAlertCircle } from 'react-icons/fi';
 import { agentsApi } from '@/api/agents';
-import { Agent } from '@/types';
+import { skillsApi } from '@/api/skills';
+import { Agent, Skill } from '@/types';
 import { ExecuteAgentModal } from '@/components/modals/ExecuteAgentModal';
 import { EditAgentModal } from '@/components/modals/EditAgentModal';
+import { SkillSelector } from '@/components/SkillSelector';
 
 export const AgentDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [agent, setAgent] = useState<Agent | null>(null);
+  const [skills, setSkills] = useState<Skill[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isExecuteModalOpen, setIsExecuteModalOpen] = useState(false);
@@ -32,6 +35,7 @@ export const AgentDetail: React.FC = () => {
           setError('Agent not found');
         } else {
           setAgent(foundAgent);
+          setSkills(foundAgent.skills || []);
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to fetch agent');
@@ -53,6 +57,30 @@ export const AgentDetail: React.FC = () => {
 
   const handleEditAgent = () => {
     setIsEditModalOpen(true);
+  };
+
+  const handleAssignSkill = async (skillId: string) => {
+    if (!agent || !id) return;
+    try {
+      await skillsApi.assignToAgent(skillId, id);
+      const updatedAgent = await agentsApi.getById(id);
+      setAgent(updatedAgent);
+      setSkills(updatedAgent.skills || []);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to assign skill');
+    }
+  };
+
+  const handleRemoveSkill = async (skillId: string) => {
+    if (!agent || !id) return;
+    try {
+      await skillsApi.removeFromAgent(skillId, id);
+      setSkills((prev) => prev.filter((s) => s.id !== skillId));
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to remove skill');
+    }
   };
 
   const handleDeleteAgent = async () => {
@@ -191,6 +219,16 @@ export const AgentDetail: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* Skills */}
+        <div className="border-t border-gray-200 pt-6">
+          <SkillSelector
+            agentId={agent.id}
+            assignedSkills={skills}
+            onAssign={handleAssignSkill}
+            onRemove={handleRemoveSkill}
+          />
+        </div>
 
         {/* Metadata */}
         <div className="border-t border-gray-200 pt-6">

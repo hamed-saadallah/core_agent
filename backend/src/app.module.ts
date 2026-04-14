@@ -6,6 +6,8 @@ import { AgentsModule } from './agents/agents.module';
 import { AgentManagementModule } from './modules/agents/agents.module';
 import { ToolsManagementModule } from './modules/tools/tools.module';
 import { AgentRunsModule } from './modules/agent-runs/agent-runs.module';
+import { ChainsModule } from './modules/chains/chains.module';
+import { SkillsModule } from './modules/skills/skills.module';
 import { ModelsModule } from './modules/models/models.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
@@ -50,6 +52,8 @@ function validateEnv(config: Record<string, unknown>) {
     AgentManagementModule,
     ToolsManagementModule,
     AgentRunsModule,
+    ChainsModule,
+    SkillsModule,
     ModelsModule,
     AuthModule,
     UsersModule,
