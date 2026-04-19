@@ -1,4 +1,4 @@
-FROM node:18-alpine AS builder
+FROM node:18-alpine
 
 WORKDIR /app
 
@@ -10,15 +10,8 @@ COPY . .
 
 RUN npm run build
 
-FROM node:18-alpine
-
-WORKDIR /app
-
-COPY package*.json ./
-
-RUN npm install --legacy-peer-deps --only=production
-
-COPY --from=builder /app/dist ./dist
+# Remove dev dependencies to reduce image size
+RUN npm prune --omit=dev
 
 EXPOSE 3000
 
