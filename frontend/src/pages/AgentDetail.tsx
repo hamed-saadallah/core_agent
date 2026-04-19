@@ -131,27 +131,27 @@ export const AgentDetail: React.FC = () => {
   }
 
   return (
-    <div className="p-6 max-w-4xl">
+    <div className="p-4 sm:p-6 max-w-4xl">
       <button
         onClick={() => navigate('/agents')}
-        className="flex items-center gap-2 text-indigo-600 hover:text-indigo-700 mb-6 transition"
+        className="flex items-center gap-2 text-indigo-600 hover:text-indigo-700 mb-4 sm:mb-6 transition text-sm sm:text-base"
       >
         <FiArrowLeft size={20} />
         Back to Agents
       </button>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex gap-3 mb-6">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-3 sm:p-4 flex gap-3 mb-4 sm:mb-6">
           <FiAlertCircle className="text-red-600 flex-shrink-0 mt-0.5" />
-          <p className="text-red-800">{error}</p>
+          <p className="text-sm sm:text-base text-red-800">{error}</p>
         </div>
       )}
 
-      <div className="bg-white rounded-lg shadow-lg p-8 space-y-6">
+      <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 md:p-8 space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-4xl font-bold mb-2">{agent.name}</h1>
-          <p className="text-gray-600 text-lg">{agent.description}</p>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">{agent.name}</h1>
+          <p className="text-sm sm:text-base md:text-lg text-gray-600">{agent.description}</p>
         </div>
 
         {/* Status Badge */}
@@ -170,8 +170,8 @@ export const AgentDetail: React.FC = () => {
         {/* Model Information */}
         {agent.model && (
           <div className="border-t border-gray-200 pt-6">
-            <h2 className="text-lg font-semibold mb-4">Model Configuration</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <h2 className="text-base sm:text-lg font-semibold mb-4">Model Configuration</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="bg-purple-50 rounded-lg p-4 border border-purple-200">
                 <p className="text-sm text-purple-600 font-medium mb-1">Model Name</p>
                 <p className="text-lg font-semibold text-purple-900">{agent.model.name}</p>
@@ -193,9 +193,9 @@ export const AgentDetail: React.FC = () => {
         {/* Prompt Template */}
         {agent.promptTemplate && (
           <div className="border-t border-gray-200 pt-6">
-            <h2 className="text-lg font-semibold mb-4">Prompt Template</h2>
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <pre className="text-sm text-blue-900 font-mono whitespace-pre-wrap break-words">
+            <h2 className="text-base sm:text-lg font-semibold mb-4">Prompt Template</h2>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4 overflow-x-auto">
+              <pre className="text-xs sm:text-sm text-blue-900 font-mono whitespace-pre-wrap break-words">
                 {agent.promptTemplate}
               </pre>
             </div>
@@ -205,15 +205,15 @@ export const AgentDetail: React.FC = () => {
         {/* Tools */}
         {agent.tools && agent.tools.length > 0 && (
           <div className="border-t border-gray-200 pt-6">
-            <h2 className="text-lg font-semibold mb-4">Associated Tools</h2>
+            <h2 className="text-base sm:text-lg font-semibold mb-4">Associated Tools</h2>
             <div className="space-y-2">
               {agent.tools.map((tool) => (
                 <div
                   key={tool.id}
-                  className="bg-gray-50 border border-gray-200 rounded-lg p-4"
+                  className="bg-gray-50 border border-gray-200 rounded-lg p-3 sm:p-4"
                 >
-                  <p className="font-medium text-gray-900">{tool.name}</p>
-                  <p className="text-sm text-gray-600">{tool.description}</p>
+                  <p className="font-medium text-sm sm:text-base text-gray-900">{tool.name}</p>
+                  <p className="text-xs sm:text-sm text-gray-600">{tool.description}</p>
                 </div>
               ))}
             </div>
@@ -232,8 +232,8 @@ export const AgentDetail: React.FC = () => {
 
         {/* Metadata */}
         <div className="border-t border-gray-200 pt-6">
-          <h2 className="text-lg font-semibold mb-4">Details</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+          <h2 className="text-base sm:text-lg font-semibold mb-4">Details</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs sm:text-sm">
             <div>
               <p className="text-gray-600">Created</p>
               <p className="font-medium text-gray-900">
@@ -248,7 +248,7 @@ export const AgentDetail: React.FC = () => {
                 {new Date(agent.updatedAt).toLocaleTimeString()}
               </p>
             </div>
-            <div>
+            <div className="sm:col-span-2">
               <p className="text-gray-600">ID</p>
               <p className="font-medium text-gray-900 text-xs break-all">{agent.id}</p>
             </div>
@@ -256,11 +256,11 @@ export const AgentDetail: React.FC = () => {
         </div>
 
         {/* Actions */}
-        <div className="border-t border-gray-200 pt-6 flex gap-3">
+        <div className="border-t border-gray-200 pt-6 flex flex-col sm:flex-row gap-3 w-full">
           {agent.promptTemplate && (
             <button
               onClick={handleRunAgent}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition"
+              className="inline-flex items-center justify-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition text-sm sm:text-base w-full sm:w-auto"
             >
               <FiPlay size={18} />
               Run Agent
@@ -268,14 +268,14 @@ export const AgentDetail: React.FC = () => {
           )}
           <button
             onClick={handleEditAgent}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition"
+            className="inline-flex items-center justify-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition text-sm sm:text-base w-full sm:w-auto"
           >
             <FiEdit size={18} />
             Edit
           </button>
           <button
             onClick={handleDeleteAgent}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition ml-auto"
+            className="inline-flex items-center justify-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition text-sm sm:text-base w-full sm:w-auto ml-auto"
           >
             <FiTrash2 size={18} />
             Delete

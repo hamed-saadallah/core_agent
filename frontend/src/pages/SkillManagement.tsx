@@ -69,21 +69,21 @@ export const SkillManagement: React.FC = () => {
   };
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Skills</h1>
+    <div className="p-4 sm:p-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 sm:gap-0 mb-6 w-full">
+        <h1 className="text-2xl sm:text-3xl font-bold">Skills</h1>
         <button
           onClick={() => setIsCreateModalOpen(true)}
-          className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
+          className="bg-blue-600 text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-blue-700 transition w-full sm:w-auto text-sm sm:text-base"
         >
           Create Skill
         </button>
       </div>
 
-      {loading && <p className="text-gray-600">Loading skills...</p>}
-      {error && <p className="text-red-600 mb-4">{error}</p>}
+      {loading && <p className="text-gray-600 text-sm sm:text-base">Loading skills...</p>}
+      {error && <p className="text-red-600 mb-4 text-sm sm:text-base">{error}</p>}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {localSkills.map((skill) => (
           <div key={skill.id} className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
             <div onClick={() => handleViewSkillDetails(skill)} className="cursor-pointer mb-4">

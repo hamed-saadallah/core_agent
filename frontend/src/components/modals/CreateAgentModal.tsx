@@ -96,10 +96,10 @@ export const CreateAgentModal: React.FC<CreateAgentModalProps> = ({ isOpen, onCl
   const enabledModels = models.filter((m) => m.status === 'enabled');
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-lg max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center p-6 border-b border-gray-200 sticky top-0 bg-white">
-          <h2 className="text-xl font-bold">Create New Agent</h2>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 sm:p-0">
+      <div className="bg-white rounded-lg shadow-lg max-w-md w-full sm:mx-4 max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center p-4 sm:p-6 border-b border-gray-200 sticky top-0 bg-white">
+          <h2 className="text-lg sm:text-xl font-bold">Create New Agent</h2>
           <button
             onClick={onClose}
             disabled={loading}
@@ -109,7 +109,7 @@ export const CreateAgentModal: React.FC<CreateAgentModalProps> = ({ isOpen, onCl
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4">
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex gap-3">
               <FiAlertCircle className="text-red-600 flex-shrink-0 mt-0.5" />

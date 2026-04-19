@@ -242,4 +242,93 @@ export class AgentRunsService {
       );
     }
   }
+
+  private formatConversationHistory(conversationHistory: Array<{ role: string; content: string }>): string {
+    if (!conversationHistory || conversationHistory.length === 0) {
+      return '';
+    }
+
+    const formatted = conversationHistory
+      .map((msg) => `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`)
+      .join('\n\n');
+
+    return `Previous conversation:\n${formatted}\n\n`;
+  }
+
+  async executeChatMessage(
+    agentId: string,
+    userId: string,
+    message: string,
+    conversationHistory?: Array<{ role: string; content: string }>,
+  ): Promise<{ response: string; conversationHistory: Array<{ role: string; content: string }> }> {
+    this.logger.log(`Executing chat message for agent: ${agentId}`);
+
+    const agent = await this.agentRepository.findOne({
+      where: { id: agentId },
+      relations: ['model'],
+    });
+
+    if (!agent) {
+      throw new NotFoundException(`Agent with ID ${agentId} not found`);
+    }
+
+    if (!agent.promptTemplate) {
+      throw new BadRequestException(`Agent ${agentId} does not have a prompt template`);
+    }
+
+    if (!agent.modelId) {
+      throw new BadRequestException(`Agent ${agentId} does not have a model assigned`);
+    }
+
+    const model = await this.modelRepository.findOne({
+      where: { id: agent.modelId },
+    });
+
+    if (!model) {
+      throw new BadRequestException(`Model ${agent.modelId} not found`);
+    }
+
+    const decryptedApiKey = this.modelsService.decryptApiKey(model);
+    const finalTemperature = agent.temperature || model.temperature;
+
+    const conversationContext = this.formatConversationHistory(conversationHistory || []);
+    const enhancedPrompt = `${agent.promptTemplate}\n\n${conversationContext}User: ${message}`;
+
+    try {
+      const mockExecutionEnabled = process.env.MOCK_EXECUTION === 'true';
+      let response: string;
+
+      if (mockExecutionEnabled) {
+        this.logger.log('Using mock execution for chat');
+        response = `Mock response to: "${message}"`;
+      } else {
+        this.logger.log('Using real LLM execution for chat');
+        const llmResponse = await this.llmService.execute({
+          prompt: enhancedPrompt,
+          temperature: parseFloat(String(finalTemperature)),
+          model: model.name,
+          apiKey: decryptedApiKey,
+          maxTokens: 2000,
+          timeout: 30000,
+        });
+        response = llmResponse.output;
+      }
+
+      const updatedHistory = [
+        ...(conversationHistory || []),
+        { role: 'user', content: message },
+        { role: 'assistant', content: response },
+      ];
+
+      return {
+        response,
+        conversationHistory: updatedHistory,
+      };
+    } catch (error) {
+      this.logger.error(`Chat execution failed: ${error}`);
+      throw new BadRequestException(
+        `Chat execution failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  }
 }

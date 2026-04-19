@@ -3,6 +3,8 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagg
 import { AuthGuard } from '@nestjs/passport';
 import { AgentRunsService } from '../services/agent-runs.service';
 import { CreateAgentRunDto, QueryAgentRunsDto } from '../dtos/agent-run.dto';
+import { CreateChatRequestDto } from '../dtos/create-chat-request.dto';
+import { ChatResponseDto } from '../dtos/chat-response.dto';
 import { AllExceptionsFilter } from '@/common/filters/all-exceptions.filter';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 
@@ -57,5 +59,17 @@ export class AgentRunsController {
     @CurrentUser() user?: any,
   ) {
     return await this.agentRunsService.getRunsByAgent(agentId, skip || 0, limit || 10, user?.id);
+  }
+
+  @Post('chat')
+  @ApiOperation({ summary: 'Chat with an agent interactively' })
+  @ApiResponse({ status: 200, description: 'Chat response with updated conversation history' })
+  async chat(@Body() createChatRequestDto: CreateChatRequestDto, @CurrentUser() user: any) {
+    return await this.agentRunsService.executeChatMessage(
+      createChatRequestDto.agentId,
+      user.id,
+      createChatRequestDto.message,
+      createChatRequestDto.conversationHistory,
+    );
   }
 }

@@ -15,6 +15,7 @@ const ChainManagement = lazy(() => import('./pages/ChainManagement').then((m) =>
 const ChainDetail = lazy(() => import('./pages/ChainDetail').then((m) => ({ default: m.ChainDetail })));
 const SkillManagement = lazy(() => import('./pages/SkillManagement').then((m) => ({ default: m.SkillManagement })));
 const SkillDetail = lazy(() => import('./pages/SkillDetail').then((m) => ({ default: m.SkillDetail })));
+const TryAgentPage = lazy(() => import('./pages/TryAgentPage').then((m) => ({ default: m.TryAgentPage })));
 const Settings = lazy(() => import('./pages/Settings').then((m) => ({ default: m.Settings })));
 const LoginPage = lazy(() => import('./pages/LoginPage').then((m) => ({ default: m.LoginPage })));
 const RegisterPage = lazy(() => import('./pages/RegisterPage').then((m) => ({ default: m.RegisterPage })));
@@ -69,6 +70,7 @@ function App() {
           <Route path="/agents/:id" element={<PrivateRoute element={<PrivateLayout element={<AgentDetail />} />} />} />
           <Route path="/agents/:agentId/runs/:runId" element={<PrivateRoute element={<PrivateLayout element={<AgentRunDetail />} />} />} />
           <Route path="/agent-runs" element={<PrivateRoute element={<PrivateLayout element={<AgentRunsPage />} />} />} />
+          <Route path="/try-agent" element={<PrivateRoute element={<PrivateLayout element={<TryAgentPage />} />} />} />
           <Route path="/chains" element={<PrivateRoute element={<PrivateLayout element={<ChainManagement />} />} />} />
           <Route path="/chains/:id" element={<PrivateRoute element={<PrivateLayout element={<ChainDetail />} />} />} />
           <Route path="/skills" element={<PrivateRoute element={<PrivateLayout element={<SkillManagement />} />} />} />

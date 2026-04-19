@@ -2,7 +2,9 @@ import { Controller, Get, Post, Body, Param, Put, Delete, Query, UseFilters, Use
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AgentsService } from '../services/agents.service';
+import { AgentSkillOrchestratorService } from '../services/agent-skill-orchestrator.service';
 import { CreateAgentDto, UpdateAgentDto, ExecuteAgentDto, ExecuteAgentWithParametersDto } from '../dtos/agent.dto';
+import { ExecuteWithContextDto, ExecuteWithContextResponseDto } from '../dtos/agent-execution.dto';
 import { AllExceptionsFilter } from '@/common/filters/all-exceptions.filter';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { UserEntity } from '@/infrastructure/database/entities/user.entity';
@@ -13,7 +15,10 @@ import { UserEntity } from '@/infrastructure/database/entities/user.entity';
 @UseGuards(AuthGuard('jwt'))
 @ApiBearerAuth()
 export class AgentsController {
-  constructor(private readonly agentsService: AgentsService) {}
+  constructor(
+    private readonly agentsService: AgentsService,
+    private readonly agentSkillOrchestratorService: AgentSkillOrchestratorService,
+  ) {}
 
   @Post()
   @ApiOperation({ summary: 'Create a new agent' })
@@ -56,4 +61,20 @@ export class AgentsController {
   async execute(@Param('id') id: string, @Body() executeDto: ExecuteAgentWithParametersDto, @CurrentUser() user: UserEntity) {
     return await this.agentsService.execute(id, executeDto, user.id);
   }
+
+  @Post(':id/execute-with-context')
+  @ApiOperation({ summary: 'Execute agent with automatic context enrichment from assigned skills' })
+  @ApiResponse({ status: 200, description: 'Agent executed with context enrichment', type: ExecuteWithContextResponseDto })
+  async executeWithContextEnrichment(
+    @Param('id') id: string,
+    @Body() executeWithContextDto: ExecuteWithContextDto,
+    @CurrentUser() user: UserEntity,
+  ): Promise<ExecuteWithContextResponseDto> {
+    return await this.agentSkillOrchestratorService.executeAgentWithContextEnrichment(
+      id,
+      executeWithContextDto.userMessage,
+      user.id,
+    );
+  }
 }
+
