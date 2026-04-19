@@ -19,8 +19,8 @@ export class DatabaseConfigService {
     return {
       host: url.hostname || 'localhost',
       port: parseInt(url.port || '5432', 10),
-      username: url.username || 'postgres',
-      password: url.password || 'postgres',
+      username: decodeURIComponent(url.username),
+      password: decodeURIComponent(url.password),
       database: url.pathname?.slice(1) || 'agent_core', // Remove leading slash
     };
   }

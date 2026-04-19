@@ -16,9 +16,9 @@
     "test:cov": "jest --coverage",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "typeorm": "typeorm",
-    "db:migrate:generate": "typeorm migration:generate",
-    "db:migrate:run": "typeorm migration:run",
-    "db:migrate:revert": "typeorm migration:revert",
+    "db:migrate:generate": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli --dataSource=data-source.ts migration:generate",
+    "db:migrate:run": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli --dataSource=data-source.ts migration:run",
+    "db:migrate:revert": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli --dataSource=data-source.ts migration:revert",
     "db:seed": "ts-node src/infrastructure/database/seeds/seed.ts",
     "docker:build": "docker build -t agent-core-backend .",
     "docker:run": "docker run -p 3000:3000 agent-core-backend"
