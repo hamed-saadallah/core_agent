@@ -39,10 +39,10 @@ export default new DataSource({
   username: dbConfig.username,
   password: dbConfig.password,
   database: dbConfig.database,
-  entities: ['src/**/*.entity.ts'],
-  migrations: ['src/config/migrations/*.ts'],
+  entities: ['dist/**/*.entity{.ts,.js}'],
+  migrations: ['dist/infrastructure/database/migrations/*{.ts,.js}'],
   subscribers: ['src/**/*.subscriber.ts'],
-  synchronize: false,
+  synchronize: true,
   logging: false,
   ssl:
     process.env.DB_SSL === 'true'
