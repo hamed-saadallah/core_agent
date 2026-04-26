@@ -1,6 +1,6 @@
 import { Repository } from 'typeorm';
-import { SkillEntity } from '@/infrastructure/database/entities/skill.entity';
-import { AgentEntity } from '@/infrastructure/database/entities/agent.entity';
+import { SkillEntity } from '../../../infrastructure/database/entities/skill.entity';
+import { AgentEntity } from '../../../infrastructure/database/entities/agent.entity';
 import { CreateSkillDto, UpdateSkillDto, QuerySkillsDto } from '../dtos/skill.dto';
 export declare class SkillsService {
     private skillRepository;

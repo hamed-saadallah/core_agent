@@ -1,10 +1,10 @@
 import { Repository } from 'typeorm';
-import { AgentRunEntity } from '@/infrastructure/database/entities/agent-run.entity';
+import { AgentRunEntity } from '../../../infrastructure/database/entities/agent-run.entity';
 import { CreateAgentRunDto, QueryAgentRunsDto } from '../dtos/agent-run.dto';
-import { LLMService } from '@/infrastructure/llm/llm.service';
-import { ModelsService } from '@/modules/models/models.service';
-import { ModelEntity } from '@/infrastructure/database/entities/model.entity';
-import { AgentEntity } from '@/infrastructure/database/entities/agent.entity';
+import { LLMService } from '../../../infrastructure/llm/llm.service';
+import { ModelsService } from '../../../modules/models/models.service';
+import { ModelEntity } from '../../../infrastructure/database/entities/model.entity';
+import { AgentEntity } from '../../../infrastructure/database/entities/agent.entity';
 export declare class AgentRunsService {
     private runRepository;
     private modelRepository;

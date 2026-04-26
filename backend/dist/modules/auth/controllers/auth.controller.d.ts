@@ -1,6 +1,6 @@
 import { AuthService } from '../services/auth.service';
 import { RegisterDto, LoginDto, VerifyEmailDto, ResendCodeDto } from '../dtos/auth.dto';
-import { UserEntity } from '@/infrastructure/database/entities/user.entity';
+import { UserEntity } from '../../../infrastructure/database/entities/user.entity';
 export declare class AuthController {
     private authService;
     constructor(authService: AuthService);

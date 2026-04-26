@@ -1,7 +1,7 @@
 import { ModelsService } from './models.service';
 import { CreateModelDto } from './dtos/create-model.dto';
 import { UpdateModelDto } from './dtos/update-model.dto';
-import { UserEntity } from '@/infrastructure/database/entities/user.entity';
+import { UserEntity } from '../../infrastructure/database/entities/user.entity';
 export declare class ModelsController {
     private readonly modelsService;
     constructor(modelsService: ModelsService);

@@ -1,5 +1,5 @@
 import { Repository } from 'typeorm';
-import { ToolEntity } from '@/infrastructure/database/entities/tool.entity';
+import { ToolEntity } from '../../../infrastructure/database/entities/tool.entity';
 import { CreateToolDto, UpdateToolDto } from '../dtos/tool.dto';
 export declare class ToolsService {
     private toolRepository;

@@ -1,6 +1,6 @@
 import { Repository } from 'typeorm';
-import { ChainNodeEntity } from '@/infrastructure/database/entities/chain-node.entity';
-import { AgentEntity } from '@/infrastructure/database/entities/agent.entity';
+import { ChainNodeEntity } from '../../../infrastructure/database/entities/chain-node.entity';
+import { AgentEntity } from '../../../infrastructure/database/entities/agent.entity';
 import { AddChainNodeDto, UpdateChainNodeDto } from '../dtos/chain.dto';
 import { ChainsService } from './chains.service';
 export declare class ChainNodesService {

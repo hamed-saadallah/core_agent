@@ -1,1 +1,0 @@
-import{p as a}from"./index-VF2wM_DR.js";const o={async getAll(){return(await a.get("/models")).data.data},async getOne(e){return(await a.get(`/models/${e}`)).data.data},async create(e){return(await a.post("/models",e)).data.data},async update(e,s){return(await a.put(`/models/${e}`,s)).data.data},async delete(e){await a.delete(`/models/${e}`)}};export{o as m};

@@ -2,7 +2,7 @@ import { AgentsService } from '../services/agents.service';
 import { AgentSkillOrchestratorService } from '../services/agent-skill-orchestrator.service';
 import { CreateAgentDto, UpdateAgentDto, ExecuteAgentWithParametersDto } from '../dtos/agent.dto';
 import { ExecuteWithContextDto, ExecuteWithContextResponseDto } from '../dtos/agent-execution.dto';
-import { UserEntity } from '@/infrastructure/database/entities/user.entity';
+import { UserEntity } from '../../../infrastructure/database/entities/user.entity';
 export declare class AgentsController {
     private readonly agentsService;
     private readonly agentSkillOrchestratorService;

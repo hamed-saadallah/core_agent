@@ -1,13 +1,13 @@
 import { Repository } from 'typeorm';
-import { AgentEntity } from '@/infrastructure/database/entities/agent.entity';
-import { ToolEntity } from '@/infrastructure/database/entities/tool.entity';
-import { PromptEntity } from '@/infrastructure/database/entities/prompt.entity';
-import { AgentRunEntity } from '@/infrastructure/database/entities/agent-run.entity';
-import { ModelEntity } from '@/infrastructure/database/entities/model.entity';
+import { AgentEntity } from '../../../infrastructure/database/entities/agent.entity';
+import { ToolEntity } from '../../../infrastructure/database/entities/tool.entity';
+import { PromptEntity } from '../../../infrastructure/database/entities/prompt.entity';
+import { AgentRunEntity } from '../../../infrastructure/database/entities/agent-run.entity';
+import { ModelEntity } from '../../../infrastructure/database/entities/model.entity';
 import { CreateAgentDto, UpdateAgentDto, ExecuteAgentWithParametersDto } from '../dtos/agent.dto';
-import { ModelsService } from '@/modules/models/models.service';
-import { LLMService } from '@/infrastructure/llm/llm.service';
-import { AgentRunsService } from '@/modules/agent-runs/services/agent-runs.service';
+import { ModelsService } from '../../../modules/models/models.service';
+import { LLMService } from '../../../infrastructure/llm/llm.service';
+import { AgentRunsService } from '../../../modules/agent-runs/services/agent-runs.service';
 export declare class AgentsService {
     private agentRepository;
     private toolRepository;

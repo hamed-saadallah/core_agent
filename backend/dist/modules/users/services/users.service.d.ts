@@ -1,7 +1,7 @@
 import { Repository } from 'typeorm';
-import { UserEntity } from '@/infrastructure/database/entities/user.entity';
-import { PlanEntity } from '@/infrastructure/database/entities/plan.entity';
-import { ProfileEntity } from '@/infrastructure/database/entities/profile.entity';
+import { UserEntity } from '../../../infrastructure/database/entities/user.entity';
+import { PlanEntity } from '../../../infrastructure/database/entities/plan.entity';
+import { ProfileEntity } from '../../../infrastructure/database/entities/profile.entity';
 export declare class UsersService {
     private usersRepository;
     private plansRepository;

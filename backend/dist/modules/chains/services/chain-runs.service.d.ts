@@ -1,7 +1,7 @@
 import { Repository } from 'typeorm';
-import { ChainRunEntity } from '@/infrastructure/database/entities/chain-run.entity';
-import { ChainEntity } from '@/infrastructure/database/entities/chain.entity';
-import { AgentRunsService } from '@/modules/agent-runs/services/agent-runs.service';
+import { ChainRunEntity } from '../../../infrastructure/database/entities/chain-run.entity';
+import { ChainEntity } from '../../../infrastructure/database/entities/chain.entity';
+import { AgentRunsService } from '../../../modules/agent-runs/services/agent-runs.service';
 import { ChainsService } from './chains.service';
 import { ChainNodesService } from './chain-nodes.service';
 import { QueryChainRunsDto } from '../dtos/chain.dto';

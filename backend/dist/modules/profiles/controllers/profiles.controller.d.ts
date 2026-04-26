@@ -1,6 +1,6 @@
 import { ProfilesService } from '../services/profiles.service';
 import { UpdateProfileDto } from '../dtos/profile.dto';
-import { UserEntity } from '@/infrastructure/database/entities/user.entity';
+import { UserEntity } from '../../../infrastructure/database/entities/user.entity';
 export declare class ProfilesController {
     private profilesService;
     constructor(profilesService: ProfilesService);

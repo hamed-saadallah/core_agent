@@ -1,4 +1,4 @@
-import { UserEntity } from '@/infrastructure/database/entities/user.entity';
+import { UserEntity } from '../../../infrastructure/database/entities/user.entity';
 import { SkillsService } from '../services/skills.service';
 import { SkillExecutorService } from '../services/skill-executor.service';
 import { SkillRunsService } from '../services/skill-runs.service';

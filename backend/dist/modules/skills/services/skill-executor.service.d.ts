@@ -1,5 +1,5 @@
-import { SkillRunEntity } from '@/infrastructure/database/entities/skill-run.entity';
-import { SkillEntity } from '@/infrastructure/database/entities/skill.entity';
+import { SkillRunEntity } from '../../../infrastructure/database/entities/skill-run.entity';
+import { SkillEntity } from '../../../infrastructure/database/entities/skill.entity';
 import { SkillRunsService } from './skill-runs.service';
 export declare class SkillExecutorService {
     private skillRunsService;

@@ -1,4 +1,4 @@
-import { UserEntity } from '@/infrastructure/database/entities/user.entity';
+import { UserEntity } from '../../../infrastructure/database/entities/user.entity';
 import { ChainsService } from '../services/chains.service';
 import { ChainNodesService } from '../services/chain-nodes.service';
 import { ChainRunsService } from '../services/chain-runs.service';

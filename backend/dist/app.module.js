@@ -29,9 +29,18 @@ const core_1 = require("@nestjs/core");
 const logger_service_1 = require("./common/services/logger.service");
 const initialization_service_1 = require("./common/services/initialization.service");
 function validateEnv(config) {
+    const nodeEnv = String(config.NODE_ENV ?? 'development').trim();
     const jwtSecret = String(config.JWT_SECRET ?? '').trim();
     if (!jwtSecret) {
         throw new Error('Invalid environment: JWT_SECRET is required');
+    }
+    const databaseUrl = String(config.DATABASE_URL ?? '').trim();
+    const hasDbParts = Boolean(String(config.DB_HOST ?? '').trim()) &&
+        Boolean(String(config.DB_USERNAME ?? '').trim()) &&
+        Boolean(String(config.DB_PASSWORD ?? '').trim()) &&
+        Boolean(String(config.DB_NAME ?? '').trim());
+    if (nodeEnv === 'production' && !databaseUrl && !hasDbParts) {
+        throw new Error('Invalid environment: DATABASE_URL or DB_* variables are required in production');
     }
     const rawExpiration = String(config.JWT_EXPIRATION ?? '3600').trim();
     const isIntegerSeconds = /^\d+$/.test(rawExpiration);

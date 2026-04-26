@@ -1,5 +1,6 @@
 import { DataSource } from 'typeorm';
 import * as dotenv from 'dotenv';
+import * as path from 'path';
 
 // Load .env file for CLI usage
 dotenv.config({ path: '.env' });
@@ -14,8 +15,8 @@ function getDatabaseConfig() {
     return {
       host: url.hostname || 'localhost',
       port: parseInt(url.port || '5432', 10),
-      username: url.username || 'postgres',
-      password: url.password || 'postgres',
+      username: decodeURIComponent(url.username || 'postgres'),
+      password: decodeURIComponent(url.password || 'postgres'),
       database: url.pathname?.slice(1) || 'agent_core',
     };
   }
@@ -31,6 +32,9 @@ function getDatabaseConfig() {
 }
 
 const dbConfig = getDatabaseConfig();
+const nodeEnv = process.env.NODE_ENV || 'development';
+const dbSslString = process.env.DB_SSL || (nodeEnv === 'production' ? 'true' : 'false');
+const sslEnabled = dbSslString === 'true' || dbSslString === '1';
 
 export default new DataSource({
   type: 'postgres',
@@ -39,13 +43,10 @@ export default new DataSource({
   username: dbConfig.username,
   password: dbConfig.password,
   database: dbConfig.database,
-  entities: ['dist/**/*.entity{.ts,.js}'],
-  migrations: ['dist/infrastructure/database/migrations/*{.ts,.js}'],
-  subscribers: ['src/**/*.subscriber.ts'],
-  synchronize: true,
-  logging: false,
-  ssl:
-    process.env.DB_SSL === 'true'
-      ? { rejectUnauthorized: false }
-      : false,
+  entities: [path.join(__dirname, '..', '**', '*.entity{.ts,.js}')],
+  migrations: [path.join(__dirname, 'migrations', '*{.ts,.js}')],
+  subscribers: [path.join(__dirname, '..', '**', '*.subscriber{.ts,.js}')],
+  synchronize: false,
+  logging: nodeEnv !== 'production',
+  ssl: sslEnabled ? { rejectUnauthorized: false } : false,
 });

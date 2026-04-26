@@ -1,5 +1,5 @@
 import { Repository } from 'typeorm';
-import { SkillRunEntity } from '@/infrastructure/database/entities/skill-run.entity';
+import { SkillRunEntity } from '../../../infrastructure/database/entities/skill-run.entity';
 import { QuerySkillsDto } from '../dtos/skill.dto';
 export declare class SkillRunsService {
     private skillRunRepository;

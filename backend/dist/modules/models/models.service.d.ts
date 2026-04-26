@@ -1,5 +1,5 @@
 import { Repository } from 'typeorm';
-import { ModelEntity } from '@/infrastructure/database/entities/model.entity';
+import { ModelEntity } from '../../infrastructure/database/entities/model.entity';
 import { CreateModelDto } from './dtos/create-model.dto';
 import { UpdateModelDto } from './dtos/update-model.dto';
 export declare class ModelsService {

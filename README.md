@@ -257,6 +257,9 @@ npm run build
 # Preview production build
 npm run preview
 
+# Serve production build on the platform PORT
+npm run start
+
 # Linting
 npm run lint
 npm run format
@@ -280,11 +283,43 @@ docker-compose logs -f frontend
 
 ### Railway
 
-1. Connect your GitHub repository
-2. Configure environment variables
-3. Set build command: `npm install && npm run build`
-4. Set start command: `npm run start:prod`
-5. Deploy!
+Deploy this repository as two Railway services because `backend/` and `frontend/` are independent Node projects.
+
+#### Backend API Service
+
+1. Create a Railway service from this repo and set the root directory to `backend`.
+2. Add a Railway PostgreSQL service and link it so `DATABASE_URL` is available to the backend.
+3. Use the included `backend/nixpacks.toml`, or configure:
+   - Build command: `npm install --include=dev && npm run build`
+   - Start command: `npm run start:prod`
+   - Health check path: `/api/health`
+4. Set these backend variables:
+
+```env
+NODE_ENV=production
+JWT_SECRET=replace-with-a-long-random-secret
+JWT_EXPIRATION=3600
+DATABASE_URL=${{Postgres.DATABASE_URL}}
+FRONTEND_URL=https://your-frontend-service.up.railway.app
+DB_SSL=true
+OPENAI_API_KEY=sk-...
+```
+
+`DATABASE_URL` takes precedence over the local `DB_*` variables. Keep `NODE_ENV=production` on Railway so TypeORM uses migrations instead of local development synchronization.
+
+#### Frontend Service
+
+1. Create a second Railway service from this repo and set the root directory to `frontend`.
+2. Use the included `frontend/nixpacks.toml`, or configure:
+   - Build command: `npm install --include=dev && npm run build`
+   - Start command: `npm run start`
+3. Set `VITE_API_URL` before building the frontend:
+
+```env
+VITE_API_URL=https://your-backend-service.up.railway.app/api
+```
+
+The backend `FRONTEND_URL` value must exactly match the public frontend origin so production CORS accepts browser requests.
 
 ## API Endpoints Overview
 
@@ -310,7 +345,7 @@ docker-compose logs -f frontend
 - `GET /agent-runs/agent/:agentId` - Get runs for agent
 
 ### Health
-- `GET /health` - Health check
+- `GET /api/health` - Health check
 
 ## Troubleshooting
 

@@ -5,8 +5,8 @@
   "author": "Agent Core Team",
   "license": "MIT",
   "scripts": {
-    "build": "nest build",
-    "start": "nest start",
+    "build": "nest build && tsc-alias",
+    "start": "node dist/main",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
@@ -15,11 +15,11 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "typeorm": "typeorm",
-    "db:migrate:generate": "typeorm migration:generate",
-    "db:migrate:run": "typeorm migration:run",
-    "db:migrate:revert": "typeorm migration:revert",
-    "db:seed": "ts-node dist/infrastructure/database/seeds/seed.js",
+    "typeorm": "typeorm-ts-node-commonjs",
+    "db:migrate:generate": "typeorm-ts-node-commonjs migration:generate -d src/config/data-source.ts",
+    "db:migrate:run": "typeorm-ts-node-commonjs migration:run -d src/config/data-source.ts",
+    "db:migrate:revert": "typeorm-ts-node-commonjs migration:revert -d src/config/data-source.ts",
+    "db:seed": "node dist/infrastructure/database/seeds/seed.js",
     "docker:build": "docker build -t agent-core-backend .",
     "docker:run": "docker run -p 3000:3000 agent-core-backend"
   },
@@ -76,6 +76,7 @@
     "ts-jest": "^29.1.1",
     "ts-loader": "^9.5.1",
     "ts-node": "^10.9.2",
+    "tsc-alias": "^1.8.16",
     "typescript": "^5.3.3"
   },
   "jest": {

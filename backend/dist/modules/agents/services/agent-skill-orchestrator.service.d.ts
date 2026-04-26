@@ -1,10 +1,10 @@
 import { Repository } from 'typeorm';
-import { AgentEntity } from '@/infrastructure/database/entities/agent.entity';
-import { ModelEntity } from '@/infrastructure/database/entities/model.entity';
-import { SkillExecutorService } from '@/modules/skills/services/skill-executor.service';
-import { SkillRunsService } from '@/modules/skills/services/skill-runs.service';
-import { LLMService } from '@/infrastructure/llm/llm.service';
-import { ModelsService } from '@/modules/models/models.service';
+import { AgentEntity } from '../../../infrastructure/database/entities/agent.entity';
+import { ModelEntity } from '../../../infrastructure/database/entities/model.entity';
+import { SkillExecutorService } from '../../../modules/skills/services/skill-executor.service';
+import { SkillRunsService } from '../../../modules/skills/services/skill-runs.service';
+import { LLMService } from '../../../infrastructure/llm/llm.service';
+import { ModelsService } from '../../../modules/models/models.service';
 export interface SkillContext {
     skillName: string;
     output: Record<string, any>;

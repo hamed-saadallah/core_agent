@@ -3,7 +3,7 @@ import { UsersService } from '../../users/services/users.service';
 import { EmailService } from './email.service';
 import { VerificationService } from './verification.service';
 import { RegisterDto, LoginDto, VerifyEmailDto, ResendCodeDto } from '../dtos/auth.dto';
-import { UserEntity } from '@/infrastructure/database/entities/user.entity';
+import { UserEntity } from '../../../infrastructure/database/entities/user.entity';
 export declare class AuthService {
     private usersService;
     private jwtService;

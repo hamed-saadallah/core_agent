@@ -35,9 +35,10 @@ async function bootstrap() {
     const document = swagger_1.SwaggerModule.createDocument(app, config);
     swagger_1.SwaggerModule.setup('docs', app, document);
     const port = configService.get('PORT', 3000);
-    await app.listen(port);
-    console.log(`Agent Core API is running on http://localhost:${port}`);
-    console.log(`Swagger documentation available at http://localhost:${port}/docs`);
+    await app.listen(port, '0.0.0.0');
+    console.log(`Agent Core API is running on port ${port}`);
+    console.log(`Health check available at /api/health`);
+    console.log(`Swagger documentation available at /docs`);
     console.log(`CORS enabled for origins: ${corsOrigins.join(', ')}`);
 }
 bootstrap();
