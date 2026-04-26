@@ -1,0 +1,10 @@
+{
+  "name": "agent-core-railway",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "npm --prefix backend install --include=dev && npm --prefix backend run build",
+    "start": "npm --prefix backend run start:prod",
+    "start:prod": "npm --prefix backend run start:prod"
+  }
+}
