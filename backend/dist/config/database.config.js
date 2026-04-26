@@ -50,6 +50,9 @@ let DatabaseConfigService = class DatabaseConfigService {
         // DB_SSL env var: 'true' means enable SSL (default for production)
         const dbSslString = this.configService.get('DB_SSL', isProduction ? 'true' : 'false');
         const sslEnabled = dbSslString === 'true' || dbSslString === '1';
+        // Avoid running both synchronize and migrations in dev: both apply schema, so
+        // InitialSchema would try CREATE after synchronize already created tables.
+        // Production: migrate only, no auto-sync. Dev: sync from entities, no auto-migrate.
         return {
             type: 'postgres',
             host: dbConfig.host,
@@ -61,7 +64,7 @@ let DatabaseConfigService = class DatabaseConfigService {
             migrations: [__dirname + '/migrations/**/*{.ts,.js}'],
             synchronize: !isProduction,
             logging: !isProduction,
-            migrationsRun: true,
+            migrationsRun: isProduction,
             ssl: sslEnabled ? { rejectUnauthorized: false } : false,
         };
     }
