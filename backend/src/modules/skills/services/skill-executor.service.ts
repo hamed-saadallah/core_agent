@@ -1,15 +1,36 @@
 import { Injectable, Logger, BadRequestException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { SkillRunEntity } from '@/infrastructure/database/entities/skill-run.entity';
 import { SkillEntity } from '@/infrastructure/database/entities/skill.entity';
+import { AgentEntity } from '@/infrastructure/database/entities/agent.entity';
 import { SkillRunsService } from './skill-runs.service';
+import { SalesforceCaseSkillService } from '@/modules/salesforce-cases/services/salesforce-case-skill.service';
+import { ModelsService } from '@/modules/models/models.service';
+
+export interface SkillExecutionContext {
+  agentId?: string;
+  /** Owner of the agent or skill run; used to load the agent model for Salesforce case skills */
+  userId?: string;
+}
 
 @Injectable()
 export class SkillExecutorService {
   private readonly logger = new Logger(SkillExecutorService.name);
 
-  constructor(private skillRunsService: SkillRunsService) {}
+  constructor(
+    private skillRunsService: SkillRunsService,
+    private salesforceCaseSkillService: SalesforceCaseSkillService,
+    private modelsService: ModelsService,
+    @InjectRepository(AgentEntity) private agentRepository: Repository<AgentEntity>,
+  ) {}
 
-  async executeSkill(skill: SkillEntity, input: Record<string, any>, skillRun: SkillRunEntity): Promise<any> {
+  async executeSkill(
+    skill: SkillEntity,
+    input: Record<string, any>,
+    skillRun: SkillRunEntity,
+    executionContext?: SkillExecutionContext,
+  ): Promise<any> {
     this.logger.log(`Executing skill: ${skill.name} (type: ${skill.type})`);
 
     const startTime = Date.now();
@@ -33,6 +54,9 @@ export class SkillExecutorService {
           break;
         case 'external_service':
           result = await this.executeExternalService(skill.config, input);
+          break;
+        case 'salesforce_case':
+          result = await this.executeSalesforceCaseSkill(skill, input, executionContext);
           break;
         default:
           throw new BadRequestException(`Unknown skill type: ${skill.type}`);
@@ -64,7 +88,7 @@ export class SkillExecutorService {
 
           // Recursively retry
           const updatedRun = await this.skillRunsService.updateStatus(skillRun.id, 'retried', undefined, undefined, executionTime);
-          return this.executeSkill(skill, input, updatedRun);
+          return this.executeSkill(skill, input, updatedRun, executionContext);
         }
       }
 
@@ -172,6 +196,31 @@ export class SkillExecutorService {
     }
 
     return result;
+  }
+
+  private async executeSalesforceCaseSkill(
+    skill: SkillEntity,
+    input: Record<string, any>,
+    executionContext?: SkillExecutionContext,
+  ): Promise<any> {
+    let llmContext: { modelName: string; apiKey: string; temperature?: number } | undefined;
+
+    if (executionContext?.agentId && executionContext?.userId) {
+      const agent = await this.agentRepository.findOne({
+        where: { id: executionContext.agentId, ownerId: executionContext.userId },
+        relations: ['model'],
+      });
+      if (!agent?.model) {
+        throw new BadRequestException('Agent must have a model assigned to run the Salesforce case skill');
+      }
+      llmContext = {
+        modelName: agent.model.name,
+        apiKey: this.modelsService.decryptApiKey(agent.model),
+        temperature: agent.temperature != null ? Number(agent.temperature) : undefined,
+      };
+    }
+
+    return this.salesforceCaseSkillService.execute(skill, input, llmContext);
   }
 
   private async executeExternalService(config: Record<string, any>, input: Record<string, any>): Promise<any> {

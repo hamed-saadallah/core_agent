@@ -133,6 +133,7 @@ export const CreateSkillModal: React.FC<CreateSkillModalProps> = ({ isOpen, onCl
               <option value="document_parse">Document Parse</option>
               <option value="data_transform">Data Transform</option>
               <option value="external_service">External Service</option>
+              <option value="salesforce_case">Salesforce Case (jsforce + LLM tools)</option>
             </select>
           </div>
 

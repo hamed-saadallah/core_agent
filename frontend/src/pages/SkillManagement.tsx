@@ -64,6 +64,7 @@ export const SkillManagement: React.FC = () => {
       document_parse: 'Document Parse',
       data_transform: 'Data Transform',
       external_service: 'External Service',
+      salesforce_case: 'Salesforce Case',
     };
     return labels[type] || type;
   };

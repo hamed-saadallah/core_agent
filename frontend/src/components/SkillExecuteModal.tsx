@@ -3,19 +3,31 @@ import { skillsApi } from '@/api/skills';
 
 interface SkillExecuteModalProps {
   skillId: string;
+  skillType?: string;
+  agents?: { id: string; name: string }[];
   isOpen: boolean;
   onClose: () => void;
   inputSchema: Record<string, any>;
 }
 
-export const SkillExecuteModal: React.FC<SkillExecuteModalProps> = ({ skillId, isOpen, onClose, inputSchema }) => {
+export const SkillExecuteModal: React.FC<SkillExecuteModalProps> = ({
+  skillId,
+  skillType,
+  agents = [],
+  isOpen,
+  onClose,
+  inputSchema,
+}) => {
   const [input, setInput] = useState<Record<string, string>>({});
+  const [agentId, setAgentId] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [executionResult, setExecutionResult] = useState<any>(null);
   const [showResult, setShowResult] = useState(false);
 
   if (!isOpen) return null;
+
+  const needsAgentForLlm = skillType === 'salesforce_case';
 
   const getInputFields = (): string[] => {
     try {
@@ -36,8 +48,25 @@ export const SkillExecuteModal: React.FC<SkillExecuteModalProps> = ({ skillId, i
     setError(null);
     setShowResult(false);
 
+    if (needsAgentForLlm && !agentId) {
+      setError('Select an agent so the skill can use its model and API key.');
+      setLoading(false);
+      return;
+    }
+
     try {
-      const result = await skillsApi.executeSkill(skillId, input);
+      let payload = { ...input };
+      if (needsAgentForLlm && inputFields.length === 0) {
+        const text = input['instruction']?.trim();
+        if (!text) {
+          setError('Enter what you want to do in Salesforce (natural language).');
+          setLoading(false);
+          return;
+        }
+        payload = { instruction: text };
+      }
+
+      const result = await skillsApi.executeSkill(skillId, payload, undefined, agentId || undefined);
       setExecutionResult(result);
       setShowResult(true);
     } catch (err) {
@@ -49,6 +78,7 @@ export const SkillExecuteModal: React.FC<SkillExecuteModalProps> = ({ skillId, i
 
   const handleClose = () => {
     setInput({});
+    setAgentId('');
     setError(null);
     setExecutionResult(null);
     setShowResult(false);
@@ -64,6 +94,28 @@ export const SkillExecuteModal: React.FC<SkillExecuteModalProps> = ({ skillId, i
 
         {!showResult ? (
           <form onSubmit={handleExecute} className="space-y-4">
+            {needsAgentForLlm && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Agent (for model & API key) *</label>
+                <select
+                  value={agentId}
+                  onChange={(e) => setAgentId(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required={needsAgentForLlm}
+                >
+                  <option value="">Select an agent…</option>
+                  {agents.map((a) => (
+                    <option key={a.id} value={a.id}>
+                      {a.name}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-gray-500 mt-1">
+                  Salesforce case skills use the selected agent&apos;s LLM. Set OPENAI_API_KEY on the server to test without an agent.
+                </p>
+              </div>
+            )}
+
             {inputFields.length > 0 ? (
               <div>
                 <h3 className="text-lg font-semibold mb-3">Input Parameters</h3>
@@ -81,6 +133,18 @@ export const SkillExecuteModal: React.FC<SkillExecuteModalProps> = ({ skillId, i
                     </div>
                   ))}
                 </div>
+              </div>
+            ) : needsAgentForLlm ? (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Instruction *</label>
+                <textarea
+                  value={input['instruction'] || ''}
+                  onChange={(e) => setInput((prev) => ({ ...prev, instruction: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
+                  rows={4}
+                  placeholder="e.g. Create a high priority case titled 'Login failure' for customer Acme"
+                  required
+                />
               </div>
             ) : (
               <p className="text-gray-600">No input parameters required</p>

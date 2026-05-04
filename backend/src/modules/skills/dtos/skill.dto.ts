@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsObject, IsNumber, IsArray } from 'class-validator';
+import { IsString, IsOptional, IsObject, IsNumber, IsUUID } from 'class-validator';
 
 export class CreateSkillDto {
   @IsString()
@@ -8,7 +8,13 @@ export class CreateSkillDto {
   description: string;
 
   @IsString()
-  type: 'api_call' | 'web_search' | 'document_parse' | 'data_transform' | 'external_service';
+  type:
+    | 'api_call'
+    | 'web_search'
+    | 'document_parse'
+    | 'data_transform'
+    | 'external_service'
+    | 'salesforce_case';
 
   @IsObject()
   config: Record<string, any>;
@@ -69,6 +75,11 @@ export class ExecuteSkillDto {
   @IsOptional()
   @IsObject()
   metadata?: Record<string, any>;
+
+  /** When set, Salesforce case skills use this agent's model and API key */
+  @IsOptional()
+  @IsUUID()
+  agentId?: string;
 }
 
 export class QuerySkillsDto {

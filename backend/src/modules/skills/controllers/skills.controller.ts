@@ -64,7 +64,10 @@ export class SkillsController {
     const skillRun = await this.skillRunsService.create(skillId, user.id, executeSkillDto.input, executeSkillDto.metadata);
 
     // Execute the skill
-    const output = await this.skillExecutorService.executeSkill(skill, executeSkillDto.input, skillRun);
+    const output = await this.skillExecutorService.executeSkill(skill, executeSkillDto.input, skillRun, {
+      userId: user.id,
+      agentId: executeSkillDto.agentId,
+    });
 
     // Get the updated run
     const updatedRun = await this.skillRunsService.findOne(skillRun.id, user.id);
