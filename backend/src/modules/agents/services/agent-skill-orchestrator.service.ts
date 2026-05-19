@@ -72,7 +72,7 @@ export class AgentSkillOrchestratorService {
     const skillContexts: SkillContext[] = [];
     for (const skill of skillsToExecute) {
       try {
-        const context = await this.executeSkillAndCaptureContext(skill, userMessage, userId);
+        const context = await this.executeSkillAndCaptureContext(skill, userMessage, userId, agentId);
         skillContexts.push(context);
       } catch (error) {
         // Capture error but don't fail entire execution
@@ -170,6 +170,7 @@ export class AgentSkillOrchestratorService {
     skill: SkillEntity,
     userMessage: string,
     userId: string,
+    agentId: string,
   ): Promise<SkillContext> {
     this.logger.log(`Executing skill: ${skill.name}`);
 
@@ -184,7 +185,10 @@ export class AgentSkillOrchestratorService {
       const skillInput = this.extractSkillInputFromMessage(skill, userMessage);
 
       // Execute the skill
-      const result = await this.skillExecutorService.executeSkill(skill, skillInput, skillRun);
+      const result = await this.skillExecutorService.executeSkill(skill, skillInput, skillRun, {
+        agentId,
+        userId,
+      });
 
       return {
         skillName: skill.name,
@@ -209,6 +213,12 @@ export class AgentSkillOrchestratorService {
    */
   private extractSkillInputFromMessage(skill: SkillEntity, userMessage: string): Record<string, any> {
     const input: Record<string, any> = {};
+
+    if (skill.type === 'salesforce_case') {
+      input['instruction'] = userMessage;
+      input['userMessage'] = userMessage;
+      return input;
+    }
 
     // For API call skills, extract parameters based on schema
     if (skill.type === 'api_call' && skill.inputSchema) {

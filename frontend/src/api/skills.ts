@@ -35,10 +35,11 @@ export const skillsApi = {
     id: string,
     input: Record<string, any>,
     metadata?: Record<string, any>,
+    agentId?: string,
   ): Promise<{ success: boolean; output: any; runId: string; executionTime: number }> {
     const response = await apiClient.post<
       ApiResponse<{ success: boolean; output: any; runId: string; executionTime: number }>
-    >(`/skills/${id}/execute`, { input, metadata });
+    >(`/skills/${id}/execute`, { input, metadata, ...(agentId && { agentId }) });
     return response.data.data;
   },
 

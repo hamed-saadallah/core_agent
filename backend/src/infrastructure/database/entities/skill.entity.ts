@@ -15,7 +15,13 @@ export class SkillEntity extends BaseEntity {
   description: string;
 
   @Column({ type: 'varchar', length: 50 })
-  type: 'api_call' | 'web_search' | 'document_parse' | 'data_transform' | 'external_service';
+  type:
+    | 'api_call'
+    | 'web_search'
+    | 'document_parse'
+    | 'data_transform'
+    | 'external_service'
+    | 'salesforce_case';
 
   @Column({ type: 'jsonb' })
   config: Record<string, any>;

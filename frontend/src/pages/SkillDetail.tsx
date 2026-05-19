@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { skillsApi } from '@/api/skills';
+import { agentsApi } from '@/api/agents';
 import { Skill } from '@/types';
 import { SkillExecuteModal } from '@/components/SkillExecuteModal';
 
@@ -13,6 +14,19 @@ export const SkillDetail: React.FC = () => {
   const [isExecuteModalOpen, setIsExecuteModalOpen] = useState(false);
   const [isEditingConfig, setIsEditingConfig] = useState(false);
   const [editedConfig, setEditedConfig] = useState('');
+  const [agents, setAgents] = useState<{ id: string; name: string }[]>([]);
+
+  useEffect(() => {
+    const loadAgents = async () => {
+      try {
+        const { agents: list } = await agentsApi.getAll(0, 200);
+        setAgents(list.map((a) => ({ id: a.id, name: a.name })));
+      } catch {
+        setAgents([]);
+      }
+    };
+    loadAgents();
+  }, []);
 
   useEffect(() => {
     const fetchSkill = async () => {
@@ -54,6 +68,7 @@ export const SkillDetail: React.FC = () => {
       document_parse: 'Document Parse',
       data_transform: 'Data Transform',
       external_service: 'External Service',
+      salesforce_case: 'Salesforce Case',
     };
     return labels[type] || type;
   };
@@ -163,6 +178,8 @@ export const SkillDetail: React.FC = () => {
 
       <SkillExecuteModal
         skillId={skill.id}
+        skillType={skill.type}
+        agents={agents}
         isOpen={isExecuteModalOpen}
         onClose={() => setIsExecuteModalOpen(false)}
         inputSchema={skill.inputSchema}

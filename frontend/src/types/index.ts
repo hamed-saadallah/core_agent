@@ -119,7 +119,7 @@ export interface Skill {
   id: string;
   name: string;
   description: string;
-  type: 'api_call' | 'web_search' | 'document_parse' | 'data_transform' | 'external_service';
+  type: 'api_call' | 'web_search' | 'document_parse' | 'data_transform' | 'external_service' | 'salesforce_case';
   config: Record<string, any>;
   inputSchema: Record<string, any>;
   outputSchema: Record<string, any>;
